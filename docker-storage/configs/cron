@@ -1,0 +1,1 @@
+0 0 * * 0 php /var/www/backend/artisan job:dispatch UpdateStripeUsageRecord > /var/www/backend/storage/logs/cron.log

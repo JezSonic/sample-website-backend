@@ -26,4 +26,13 @@ trait Response {
             "content" => $value
         ]);
     }
+
+    function invalidCredentialsResponse(): JsonResponse {
+        return response()->json([
+            /**
+             * Message indicating that invalid login credentials such as email, password, etc. were provided.
+             */
+            'content' => 'invalid_credentials'
+        ], 401);
+    }
 }

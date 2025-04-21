@@ -1,25 +1,10 @@
 services:
-  frontend-app:
+  backend:
     environment:
       VITE_APP_APP_ENV: 'local'
     build:
-      context: ./frontend
-    container_name: frontend-app-dev
-    restart: always
-    depends_on:
-      - backend-app
-    ports:
-      - '3000:3000'
-    volumes:
-      - type: bind
-        source: ./frontend
-        target: /var/www/frontend
-  backend-app:
-    environment:
-      VITE_APP_APP_ENV: 'local'
-    build:
-      context: ./backend
-    container_name: backend-app-dev
+      context: ./
+    container_name: backend-dev
     restart: always
     depends_on:
       - mysql
@@ -30,14 +15,16 @@ services:
       - db
     volumes:
       - type: bind
-        source: ./backend
+        source: ./
         target: /var/www/backend
   mysql:
-    image: 'mysql:8.4.3'
+    image: 'mysql:8.4.4'
     container_name: mysql-dev
     restart: always
     networks:
       - db
+    ports:
+      - '3306:3306'
     environment:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_ROOT_HOST: '%'
@@ -46,7 +33,7 @@ services:
       MYSQL_PASSWORD: 'password'
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     volumes:
-      - 'sail-mysql:/var/lib/mysql'
+      - 'mysql:/var/lib/mysql'
   redis:
     image: 'redis:7.4.1'
     container_name: redis-dev
@@ -55,12 +42,12 @@ services:
     networks:
       - db
     volumes:
-      - 'sail-redis:/data'
-      - './backend/docker-storage/configs/redis.conf:/etc/redis/redis.conf'
+      - 'redis:/data'
+      - './docker-storage/configs/redis.conf:/etc/redis/redis.conf'
 volumes:
-  sail-mysql:
+  mysql:
     driver: local
-  sail-redis:
+  redis:
     driver: local
 networks:
   db:

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Scramble\Extensions;
+namespace App\Scramble\Extensions\OAuth;
 
 use App\Exceptions\Auth\OAuth\AuthOAuthException;
+use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use Dedoc\Scramble\Extensions\ExceptionToResponseExtension;
 use Dedoc\Scramble\Support\Generator\Reference;
 use Dedoc\Scramble\Support\Generator\Response;
@@ -12,11 +13,11 @@ use Dedoc\Scramble\Support\Type\ObjectType;
 use Dedoc\Scramble\Support\Type\Type;
 use Illuminate\Support\Str;
 
-class OAuthExceptionExtension extends ExceptionToResponseExtension {
+class UnsupportedDriverExceptionExtension extends ExceptionToResponseExtension {
     public function shouldHandle(Type $type): bool {
         return $type instanceof ObjectType
             && (
-            $type->isInstanceOf(AuthOAuthException::class)
+            $type->isInstanceOf(UnsupportedDriver::class)
             );
     }
 
@@ -30,7 +31,7 @@ class OAuthExceptionExtension extends ExceptionToResponseExtension {
             ->setRequired(['message']);
 
         return Response::make(401)
-            ->description('OAuth Authentication exception')
+            ->description('Unsupported OAuth Driver exception')
             ->setContent(
                 'application/json',
                 Schema::fromType($validationResponseBodyType)

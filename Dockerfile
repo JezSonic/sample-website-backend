@@ -26,7 +26,7 @@ RUN a2enmod rewrite \
 	&& a2enmod ssl \
 	&& a2enmod php8.4
 COPY docker-storage/configs/000-backend.conf /etc/apache2/sites-enabled/000-default.conf
-COPY docker-storage/configs/saas-cron /etc/cron.d/saas-cron
-RUN chmod 0644 /etc/cron.d/saas-cron
-RUN crontab /etc/cron.d/saas-cron
+#COPY docker-storage/configs/cron /etc/cron.d/cron
+#RUN chmod 0644 /etc/cron.d/cron
+#RUN crontab /etc/cron.d/cron
 ENTRYPOINT ["/var/www/backend/docker-storage/entrypoint.sh", "-e", "local"]

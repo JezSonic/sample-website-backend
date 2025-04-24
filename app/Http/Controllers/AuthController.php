@@ -14,14 +14,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller {
     use Response;
-
     private array $supported_drivers = [OAuthDrivers::GITHUB, OAuthDrivers::GOOGLE];
-
 
     function register(RegisterRequest $request): JsonResponse {
         $data = $request->all();
@@ -40,6 +39,13 @@ class AuthController extends Controller {
      * @throws UnsupportedDriver
      */
     function callback(Request $request, OAuthDrivers $driver): JsonResponse {
+        function token_expiration(mixed $expires_in): int|null {
+            if ($expires_in == null) {
+                return null;
+            }
+            return time() + intval($expires_in);
+        }
+
         $request->session()->regenerate(true);
         $this->checkDriver($driver);
         $userData = Socialite::driver($driver->value)->stateless()->user();
@@ -95,6 +101,7 @@ class AuthController extends Controller {
                     'public_following' => $userData->user['following'],
                     'github_refresh_token' => $userData->refreshToken,
                     'github_token' => $userData->token,
+                    'github_token_expires_in' => token_expiration($userData->expiresIn),
                 ]);
         } else if ($driver == OAuthDrivers::GOOGLE) {
             GoogleUserData::updateOrCreate(
@@ -108,6 +115,7 @@ class AuthController extends Controller {
                     'google_name' => $userData->name,
                     'google_email' => $userData->email,
                     'google_avatar_url' => $userData->avatar,
+                    'google_token_expires_in' => token_expiration($userData->expiresIn),
                 ]);
         }
 
@@ -159,6 +167,20 @@ class AuthController extends Controller {
      */
     function oauth(Request $request, OAuthDrivers $driver): JsonResponse {
         $this->checkDriver($driver);
+        if ($driver->value == OAuthDrivers::GOOGLE->value) {
+            return response()->json([
+                    /**
+                     * Target URL for OAuth login
+                     */
+                    'content' => Socialite::driver($driver->value)->with(array_merge([
+                        'access_type' => 'offline',
+                        'prompt' => 'consent',
+                    ], [
+                        'state' => 'integration_id='.$request->input('integration_id', '')
+                    ]))->redirect()->getTargetUrl()
+                ]
+            );
+        }
         return response()->json([
                 /**
                  * Target URL for OAuth login

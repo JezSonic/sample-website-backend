@@ -46,6 +46,7 @@ class GitHubUserData extends Model {
         'public_followers',
         'public_following',
         'github_token',
+        'github_token_expires_in',
         'github_refresh_token'
     ];
 

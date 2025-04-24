@@ -19,6 +19,7 @@ class GoogleUserData extends Model {
         'google_avatar_url',
         'id',
         'google_token',
+        'google_token_expires_in',
         'google_refresh_token'
     ];
 

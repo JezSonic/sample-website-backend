@@ -23,7 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->appendToGroup('api', StartSession::class);
-        $middleware->appendToGroup('api', RedirectIfAuthenticated::class);
         $middleware->appendToGroup('api', ShareErrorsFromSession::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

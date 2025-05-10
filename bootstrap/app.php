@@ -1,16 +1,18 @@
 <?php
 
 use App\Exceptions\Auth\OAuth\AuthOAuthException;
-use App\Http\Middleware\RedirectIfAuthenticated;
 use Firebase\JWT\ExpiredException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Nette\NotImplementedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -24,6 +26,19 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->appendToGroup('api', StartSession::class);
         $middleware->appendToGroup('api', ShareErrorsFromSession::class);
+        $middleware->removeFromGroup('api', RedirectIfAuthenticated::class);
+        $middleware->removeFromGroup('api', AddQueuedCookiesToResponse::class);
+        $middleware->removeFromGroup('api', EnsureFrontendRequestsAreStateful::class);
+        $middleware->appendToGroup('web', StartSession::class);
+        $middleware->appendToGroup('web', ShareErrorsFromSession::class);
+        $middleware->removeFromGroup('web', RedirectIfAuthenticated::class);
+        $middleware->removeFromGroup('web', AddQueuedCookiesToResponse::class);
+        $middleware->removeFromGroup('web', EnsureFrontendRequestsAreStateful::class);
+        $middleware->statefulApi();
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

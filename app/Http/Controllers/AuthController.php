@@ -123,7 +123,7 @@ class AuthController extends Controller {
             'email' => $userData->email,
         ], $data);
         Auth::login($user);
-        return response()->json(['content' => $user->id]);
+        return response()->json(['content' => $user->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
     }
 
     /**
@@ -159,7 +159,7 @@ class AuthController extends Controller {
         }
 
         $request->session()->start();
-        return response()->json(['content' => $user_check->id]);
+        return response()->json(['content' => $user_check->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
     }
 
     /**

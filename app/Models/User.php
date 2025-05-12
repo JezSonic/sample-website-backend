@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'github_id',
         'github_token',
@@ -69,5 +70,9 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function gitHubData(): HasOne {
         return $this->hasOne(GitHubUserData::class);
+    }
+
+    public function profileSettings(): HasOne {
+        return $this->hasOne(UserProfileSettings::class);
     }
 }

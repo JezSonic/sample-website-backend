@@ -8,6 +8,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
 use App\Models\User;
+use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
@@ -32,6 +33,9 @@ class AuthController extends Controller {
         $user->email = $data['email'];
         $user->name = $data['name'];
         $user->save();
+        $user_profile_settings = new UserProfileSettings();
+        $user_profile_settings->user_id = $user->id;
+        $user_profile_settings->save();
         return $this->boolResponse(true);
     }
 
@@ -60,14 +64,20 @@ class AuthController extends Controller {
             $new_user->email = $userData->email;
             $new_user->save();
             $user_id = User::where('email', '=', $userData->email)->first()->id;
+            $user_profile_settings = new UserProfileSettings();
+            $user_profile_settings->user_id = $user_id;
+            $user_profile_settings->save();
         }
 
         if ($driver == OAuthDrivers::GITHUB) {
+            if ($data['email'] == $userData->user['email']) {
+                $data['email_verified_at'] = now();
+            }
+
             GitHubUserData::updateOrCreate(
                 [
                     'user_id' => $user_id
-                ],
-                [
+                ], [
                     'id' => $userData->user['id'],
                     'github_login' => $userData->user['login'],
                     'github_avatar_url' => $userData->user['avatar_url'],
@@ -107,8 +117,7 @@ class AuthController extends Controller {
             GoogleUserData::updateOrCreate(
                 [
                     'user_id' => $user_id
-                ],
-                [
+                ], [
                     'id' => $userData->id,
                     'google_token' => $userData->token,
                     'google_refresh_token' => $userData->refreshToken,
@@ -117,6 +126,10 @@ class AuthController extends Controller {
                     'google_avatar_url' => $userData->avatar,
                     'google_token_expires_in' => token_expiration($userData->expiresIn),
                 ]);
+            $email_verified = $userData->user['email_verified'] || $userData->user['verified_email'];
+            if ($data['email'] == $userData->user['email'] && $email_verified) {
+                $data['email_verified_at'] = now();
+            }
         }
 
         $user = User::updateOrCreate([
@@ -180,6 +193,13 @@ class AuthController extends Controller {
                     ]))->redirect()->getTargetUrl()
                 ]
             );
+        } else if ($driver->value == OAuthDrivers::GITHUB->value) {
+            return response()->json([
+                /**
+                 * Target URL for OAuth login
+                 */
+                'content' => Socialite::driver($driver->value)->scopes(['user'])->redirect()->getTargetUrl()
+            ]);
         }
         return response()->json([
                 /**
@@ -195,5 +215,21 @@ class AuthController extends Controller {
         $request->session()->invalidate();
         $request->session()->flush();
         return $this->boolResponse(true)->withoutCookie('newdev_token');
+    }
+
+    /**
+     * @throws UnsupportedDriver
+     */
+    function revokeOAuth(Request $request, OAuthDrivers $driver): JsonResponse {
+        $this->checkDriver($driver);
+        $user = Auth::user();
+        if ($driver->value == OAuthDrivers::GOOGLE->value) {
+            $google_data = $user->googleData()->first();
+            $google_data->delete();
+        } else if ($driver->value == OAuthDrivers::GITHUB->value) {
+            $github_data = $user->gitHubData()->first();
+            $github_data->delete();
+        }
+        return $this->boolResponse(true);
     }
 }

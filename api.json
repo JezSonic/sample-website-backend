@@ -85,10 +85,14 @@
                                     "properties": {
                                         "content": {
                                             "type": "string"
+                                        },
+                                        "token": {
+                                            "type": "string"
                                         }
                                     },
                                     "required": [
-                                        "content"
+                                        "content",
+                                        "token"
                                     ]
                                 }
                             }
@@ -139,6 +143,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -170,10 +177,14 @@
                                     "properties": {
                                         "content": {
                                             "type": "string"
+                                        },
+                                        "token": {
+                                            "type": "string"
                                         }
                                     },
                                     "required": [
-                                        "content"
+                                        "content",
+                                        "token"
                                     ]
                                 }
                             }
@@ -234,6 +245,55 @@
                 }
             }
         },
+        "/api/auth/{driver}/revoke": {
+            "post": {
+                "operationId": "auth.revokeOAuth",
+                "tags": [
+                    "Auth"
+                ],
+                "parameters": [
+                    {
+                        "name": "driver",
+                        "in": "path",
+                        "required": true,
+                        "description": "The driver ID",
+                        "schema": {
+                            "$ref": "#/components/schemas/OAuthDrivers"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                }
+            }
+        },
         "/sanctum/csrf-cookie": {
             "get": {
                 "operationId": "sanctum.csrf-cookie",
@@ -266,13 +326,12 @@
         "/api/user": {
             "get": {
                 "operationId": "user.index",
-                "summary": "Display a currently logged-in user",
                 "tags": [
                     "User"
                 ],
                 "responses": {
                     "200": {
-                        "description": "`UserResource`",
+                        "description": "} elseif ($provider === 'github') {\n$response = Http::post('https:github.com/login/oauth/access_token', [\n'client_id' => config('services.github.client_id'),\n'client_secret' => config('services.github.client_secret'),\n'grant_type' => 'refresh_token',\n'refresh_token' => $user->refresh_token,\n]);\n\nif ($response->successful()) {\n$data = $response->json();\n$user->update([\n'access_token' => $data['access_token'],\n'refresh_token' => $data['refresh_token']]\n);\n} else {\nAuth::logout();\nthrow new Exception('Failed to refresh GitHub token.');\n}\n}\n}\n\n`UserResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -280,12 +339,63 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "user.update",
+                "tags": [
+                    "User"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProfileSettingsUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             },
             "post": {
                 "operationId": "user.store",
-                "summary": "Store a newly created resource in storage",
                 "tags": [
                     "User"
                 ],
@@ -296,10 +406,89 @@
                 }
             }
         },
+        "/api/user/verify-email": {
+            "post": {
+                "operationId": "user.sendVerificationEmail_0",
+                "tags": [
+                    "User"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/api/user/verify-email/{token}": {
+            "post": {
+                "operationId": "user.sendVerificationEmail_0",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/api/user/{user}": {
             "get": {
                 "operationId": "user.show",
-                "summary": "Display the specified resource",
                 "tags": [
                     "User"
                 ],
@@ -324,58 +513,6 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
-                    }
-                }
-            },
-            "put": {
-                "operationId": "user.update",
-                "summary": "Update the specified resource in storage",
-                "tags": [
-                    "User"
-                ],
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "required": true,
-                        "description": "The user ID",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "user.destroy",
-                "summary": "Remove the specified resource from storage",
-                "tags": [
-                    "User"
-                ],
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "required": true,
-                        "description": "The user ID",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -565,6 +702,54 @@
                 ],
                 "title": "OAuthDrivers"
             },
+            "ProfileSettingsUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "avatar_source": {
+                        "type": "string"
+                    },
+                    "is_public": {
+                        "type": "boolean"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "theme": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "notifications": {
+                        "type": "object",
+                        "properties": {
+                            "email_notifications": {
+                                "type": "boolean"
+                            },
+                            "email_marketing": {
+                                "type": "boolean"
+                            },
+                            "email_security_alerts": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "email_notifications",
+                            "email_marketing",
+                            "email_security_alerts"
+                        ]
+                    }
+                },
+                "required": [
+                    "avatar_source",
+                    "is_public",
+                    "language",
+                    "theme",
+                    "name",
+                    "notifications"
+                ],
+                "title": "ProfileSettingsUpdateRequest"
+            },
             "RegisterRequest": {
                 "type": "object",
                 "properties": {
@@ -585,6 +770,54 @@
                     "password"
                 ],
                 "title": "RegisterRequest"
+            },
+            "UserProfileSettingsResource": {
+                "type": "object",
+                "properties": {
+                    "theme": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "avatar_source": {
+                        "type": "string"
+                    },
+                    "is_public": {
+                        "type": "string"
+                    },
+                    "notifications": {
+                        "type": "object",
+                        "properties": {
+                            "email_notifications": {
+                                "type": "string"
+                            },
+                            "email_marketing": {
+                                "type": "string"
+                            },
+                            "email_security_alerts": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "email_notifications",
+                            "email_marketing",
+                            "email_security_alerts"
+                        ]
+                    }
+                },
+                "required": [
+                    "theme",
+                    "language",
+                    "timezone",
+                    "avatar_source",
+                    "is_public",
+                    "notifications"
+                ],
+                "title": "UserProfileSettingsResource"
             },
             "UserResource": {
                 "type": "object",
@@ -624,6 +857,9 @@
                     },
                     "github": {
                         "$ref": "#/components/schemas/GitHubUserDataResource"
+                    },
+                    "profile_settings": {
+                        "$ref": "#/components/schemas/UserProfileSettingsResource"
                     }
                 },
                 "required": [
@@ -638,8 +874,8 @@
             }
         },
         "responses": {
-            "ModelNotFoundException": {
-                "description": "Not found",
+            "AuthenticationException": {
+                "description": "Unauthenticated",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -689,6 +925,25 @@
             },
             "AuthorizationException": {
                 "description": "Authorization error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
                 "content": {
                     "application/json": {
                         "schema": {

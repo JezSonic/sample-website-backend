@@ -8,6 +8,7 @@ use App\Mail\VerifyEmailAddress;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
 use App\Models\User;
+use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
 use App\Utils\Traits\Response;
 use Exception;
@@ -93,6 +94,11 @@ class UserController extends Controller {
         $data = $request->all();
         $user = User::where('id', '=', Auth::user()->id)->first();
         $user_profile_settings = $user->profileSettings()->first();
+        if ($user_profile_settings == null) {
+            $user_profile_settings = new UserProfileSettings();
+            $user_profile_settings->user_id = $user->id;
+        }
+
         $user->name = $data['name'];
         $user->save();
         $user_profile_settings->avatar_source = $data['avatar_source'];

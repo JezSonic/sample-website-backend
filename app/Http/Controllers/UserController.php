@@ -128,8 +128,19 @@ class UserController extends Controller {
         throw new NotImplementedException();
     }
 
-    public function destroy(User $user) {
-        throw new NotImplementedException();
+    public function destroy(Request $request): JsonResponse {
+        $user = Auth::user();
+        $db_user = User::where('id', '=', $user->id);
+        if ($db_user == null) {
+            return $this->invalidCredentialsResponse();
+        }
+
+        $db_user->googleData()->delete();
+        $db_user->profileSettings()->delete();
+        $db_user->githubData()->delete();
+        $db_user->loginActivities()->delete();
+        $db_user->delete();
+        return $this->boolResponse(true);
     }
 
     /**

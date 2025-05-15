@@ -8,8 +8,10 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
 use App\Models\User;
+use App\Models\UserLoginActivity;
 use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
+use App\Utils\Services\IpLocationService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -136,6 +138,20 @@ class AuthController extends Controller {
             'email' => $userData->email,
         ], $data);
         Auth::login($user);
+
+        // Log login activity
+        $ip_address = $data['ip_address'] ?? $request->ip();
+        $location = IpLocationService::getLocationFromIp($ip_address);
+
+        $activity = UserLoginActivity::create([
+            'user_id' => $user->id,
+            'ip_address' => $ip_address,
+            'location' => $location,
+            'user_agent' => $request->userAgent(),
+            'login_method' => 'oauth_' . $driver->value,
+        ]);
+        $activity->save();
+
         return response()->json(['content' => $user->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
     }
 
@@ -156,7 +172,7 @@ class AuthController extends Controller {
      * @uses User::getSalt()
      */
     function login(LoginRequest $request): JsonResponse {
-        Auth::logout();
+        Auth::guard()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         $user = new User();
@@ -172,6 +188,20 @@ class AuthController extends Controller {
         }
 
         $request->session()->start();
+
+        // Log login activity
+        $ip_address = $data['ip_address'] ?? $request->ip();
+        $location = IpLocationService::getLocationFromIp($ip_address);
+
+        $activity = UserLoginActivity::create([
+            'user_id' => $user_check->id,
+            'ip_address' => $ip_address,
+            'location' => $location,
+            'user_agent' => $request->userAgent(),
+            'login_method' => 'email'
+        ]);
+        $activity->save();
+
         return response()->json(['content' => $user_check->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
     }
 
@@ -211,9 +241,8 @@ class AuthController extends Controller {
     }
 
     function logout(Request $request): JsonResponse {
-        Auth::logout();
+        Auth::user()?->tokens()->delete();
         $request->session()->invalidate();
-        $request->session()->flush();
         return $this->boolResponse(true)->withoutCookie('newdev_token');
     }
 

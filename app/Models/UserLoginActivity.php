@@ -14,6 +14,8 @@ class UserLoginActivity extends Model {
         'login_method'
     ];
 
+    protected $table = 'user_login_activities';
+
     /**
      * Get the user that owns the login activity.
      */

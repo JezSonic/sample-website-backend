@@ -15,8 +15,6 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Nette\NotImplementedException;
@@ -98,9 +96,11 @@ class UserController extends Controller {
             $user_profile_settings = new UserProfileSettings();
             $user_profile_settings->user_id = $user->id;
         }
+        if ($data['name'] != '' && $data['name'] != null) {
+            $user->name = $data['name'];
+            $user->save();
+        }
 
-        $user->name = $data['name'];
-        $user->save();
         $user_profile_settings->avatar_source = $data['avatar_source'];
         $user_profile_settings->is_public = $data['is_public'];
         $user_profile_settings->language = $data['language'];

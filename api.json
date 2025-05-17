@@ -151,7 +151,7 @@
             }
         },
         "/api/auth/{driver}/callback": {
-            "get": {
+            "post": {
                 "operationId": "auth.callback",
                 "tags": [
                     "Auth"
@@ -167,6 +167,16 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthCallbackRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -195,6 +205,12 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -213,6 +229,16 @@
                         "description": "The driver ID",
                         "schema": {
                             "$ref": "#/components/schemas/OAuthDrivers"
+                        }
+                    },
+                    {
+                        "name": "integration_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         }
                     }
                 ],
@@ -241,6 +267,12 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -519,6 +551,40 @@
                     }
                 }
             }
+        },
+        "/api/user/activity/login": {
+            "get": {
+                "operationId": "userLoginActivity.index",
+                "tags": [
+                    "UserLoginActivity"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UserLoginActivityResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -686,13 +752,29 @@
                     "password": {
                         "type": "string",
                         "minLength": 6
+                    },
+                    "ip_address": {
+                        "type": "string"
                     }
                 },
                 "required": [
                     "email",
-                    "password"
+                    "password",
+                    "ip_address"
                 ],
                 "title": "LoginRequest"
+            },
+            "OAuthCallbackRequest": {
+                "type": "object",
+                "properties": {
+                    "ip_address": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ip_address"
+                ],
+                "title": "OAuthCallbackRequest"
             },
             "OAuthDrivers": {
                 "type": "string",
@@ -718,7 +800,10 @@
                         "type": "string"
                     },
                     "name": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "notifications": {
                         "type": "object",
@@ -745,7 +830,6 @@
                     "is_public",
                     "language",
                     "theme",
-                    "name",
                     "notifications"
                 ],
                 "title": "ProfileSettingsUpdateRequest"
@@ -770,6 +854,47 @@
                     "password"
                 ],
                 "title": "RegisterRequest"
+            },
+            "UserLoginActivityResource": {
+                "type": "object",
+                "properties": {
+                    "ip_address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "user_agent": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "login_method": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "performed_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "ip_address",
+                    "user_agent",
+                    "login_method",
+                    "location",
+                    "performed_at"
+                ],
+                "title": "UserLoginActivityResource"
             },
             "UserProfileSettingsResource": {
                 "type": "object",

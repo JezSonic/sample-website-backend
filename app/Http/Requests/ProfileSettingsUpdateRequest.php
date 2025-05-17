@@ -24,7 +24,7 @@ class ProfileSettingsUpdateRequest extends FormRequest {
             'is_public' => 'required|boolean',
             'language' => 'required|string',
             'theme' => 'required|string',
-            'name' => 'required|string',
+            'name' => 'nullable|string',
             'notifications' => 'required|array',
             'notifications.email_notifications' => 'required|boolean',
             'notifications.email_marketing' => 'required|boolean',

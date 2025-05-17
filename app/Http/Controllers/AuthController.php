@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\OAuthCallbackRequest;
+use App\Http\Requests\OAuthRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
@@ -44,7 +46,7 @@ class AuthController extends Controller {
     /**
      * @throws UnsupportedDriver
      */
-    function callback(Request $request, OAuthDrivers $driver): JsonResponse {
+    function callback(OAuthCallbackRequest $request, OAuthDrivers $driver): JsonResponse {
         function token_expiration(mixed $expires_in): int|null {
             if ($expires_in == null) {
                 return null;
@@ -208,7 +210,7 @@ class AuthController extends Controller {
     /**
      * @throws UnsupportedDriver
      */
-    function oauth(Request $request, OAuthDrivers $driver): JsonResponse {
+    function oauth(OAuthRequest $request, OAuthDrivers $driver): JsonResponse {
         $this->checkDriver($driver);
         if ($driver->value == OAuthDrivers::GOOGLE->value) {
             return response()->json([

@@ -440,7 +440,7 @@
         },
         "/api/user/verify-email": {
             "post": {
-                "operationId": "user.sendVerificationEmail_0",
+                "operationId": "user.sendVerificationEmail",
                 "tags": [
                     "User"
                 ],
@@ -475,7 +475,7 @@
         },
         "/api/user/verify-email/{token}": {
             "post": {
-                "operationId": "user.sendVerificationEmail_0",
+                "operationId": "user.verifyEmail",
                 "tags": [
                     "User"
                 ],

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', [UserController::class, 'index'])->middleware('auth:sanctum');
 Route::patch('/user', [UserController::class, 'update'])->middleware('auth:sanctum');
 Route::post('/user/verify-email', [UserController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
-Route::post('/user/verify-email/{token}', [UserController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');
+Route::post('/user/verify-email/{token}', [UserController::class, 'verifyEmail'])->middleware('auth:sanctum');
 Route::apiResource('/user', UserController::class, ['except' => ['index', 'update', 'destroy', 'edit']]);;
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);

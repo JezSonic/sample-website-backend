@@ -171,4 +171,13 @@ class UserController extends Controller {
         Mail::to($user)->send(new VerifyEmailAddress($verificationUrl));
         return $this->boolResponse(true);
     }
+
+    public function verifyEmail(Request $request, $token): JsonResponse {
+        $user = User::where('id', '=', Auth::user()->id)->first();
+        if ($user == null) {
+            return $this->invalidCredentialsResponse();
+        }
+        //@TODO: Write actual logic there
+        return $this->boolResponse(true);
+    }
 }

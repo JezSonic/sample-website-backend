@@ -8,12 +8,13 @@ use App\Models\User;
 use App\Models\UserLoginActivity;
 use App\Models\UserProfileSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_correct_fillable_attributes() {
         $user = new User();
         $this->assertEquals([
@@ -27,7 +28,7 @@ class UserTest extends TestCase {
         ], $user->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_correct_hidden_attributes() {
         $user = new User();
         $this->assertEquals([
@@ -37,7 +38,7 @@ class UserTest extends TestCase {
         ], $user->getHidden());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_salt() {
         $user = User::factory()->create([
             'salt' => 'test-salt'
@@ -46,7 +47,7 @@ class UserTest extends TestCase {
         $this->assertEquals('test-salt', $user->getSalt());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_google_data_relationship() {
         $user = User::factory()->create();
         GoogleUserData::factory()->create([
@@ -57,7 +58,7 @@ class UserTest extends TestCase {
         $this->assertEquals($user->id, $user->googleData->user_id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_github_data_relationship() {
         $user = User::factory()->create();
         GitHubUserData::factory()->create([
@@ -68,7 +69,7 @@ class UserTest extends TestCase {
         $this->assertEquals($user->id, $user->gitHubData->user_id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_profile_settings_relationship() {
         $user = User::factory()->create();
         UserProfileSettings::factory()->create([
@@ -79,7 +80,7 @@ class UserTest extends TestCase {
         $this->assertEquals($user->id, $user->profileSettings->user_id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_login_activities_relationship() {
         $user = User::factory()->create();
         UserLoginActivity::factory(3)->create([

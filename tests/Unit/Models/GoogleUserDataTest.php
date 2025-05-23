@@ -5,15 +5,14 @@ namespace Tests\Unit\Models;
 use App\Models\GoogleUserData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class GoogleUserDataTest extends TestCase
-{
+class GoogleUserDataTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_has_correct_fillable_attributes()
-    {
+    #[Test]
+    public function it_has_correct_fillable_attributes() {
         $googleData = new GoogleUserData();
         $this->assertEquals([
             'user_id',
@@ -27,9 +26,8 @@ class GoogleUserDataTest extends TestCase
         ], $googleData->getFillable());
     }
 
-    /** @test */
-    public function it_belongs_to_user()
-    {
+    #[Test]
+    public function it_belongs_to_user() {
         $user = User::factory()->create();
         $googleData = GoogleUserData::factory()->create([
             'user_id' => $user->id
@@ -39,16 +37,14 @@ class GoogleUserDataTest extends TestCase
         $this->assertEquals($user->id, $googleData->user->id);
     }
 
-    /** @test */
-    public function it_has_no_timestamps()
-    {
+    #[Test]
+    public function it_has_no_timestamps() {
         $googleData = new GoogleUserData();
         $this->assertFalse($googleData->timestamps);
     }
 
-    /** @test */
-    public function it_has_correct_table_name()
-    {
+    #[Test]
+    public function it_has_correct_table_name() {
         $googleData = new GoogleUserData();
         $this->assertEquals('google_user_data', $googleData->getTable());
     }

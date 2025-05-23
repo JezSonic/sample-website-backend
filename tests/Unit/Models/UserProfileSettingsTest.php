@@ -5,15 +5,14 @@ namespace Tests\Unit\Models;
 use App\Models\User;
 use App\Models\UserProfileSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class UserProfileSettingsTest extends TestCase
-{
+class UserProfileSettingsTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_has_correct_fillable_attributes()
-    {
+    #[Test]
+    public function it_has_correct_fillable_attributes() {
         $profileSettings = new UserProfileSettings();
         $this->assertEquals([
             'user_id',
@@ -29,23 +28,20 @@ class UserProfileSettingsTest extends TestCase
         ], $profileSettings->getFillable());
     }
 
-    /** @test */
-    public function it_has_no_timestamps()
-    {
+    #[Test]
+    public function it_has_no_timestamps() {
         $profileSettings = new UserProfileSettings();
         $this->assertFalse($profileSettings->timestamps);
     }
 
-    /** @test */
-    public function it_has_correct_table_name()
-    {
+    #[Test]
+    public function it_has_correct_table_name() {
         $profileSettings = new UserProfileSettings();
         $this->assertEquals('users_profile_settings', $profileSettings->getTable());
     }
 
-    /** @test */
-    public function it_has_default_values()
-    {
+    #[Test]
+    public function it_has_default_values() {
         $user = User::factory()->create();
         $profileSettings = UserProfileSettings::factory()->create([
             'user_id' => $user->id

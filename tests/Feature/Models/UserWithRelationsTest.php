@@ -8,15 +8,14 @@ use App\Models\User;
 use App\Models\UserLoginActivity;
 use App\Models\UserProfileSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class UserWithRelationsTest extends TestCase
-{
+class UserWithRelationsTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function can_create_user_with_all_related_models()
-    {
+    #[Test]
+    public function can_create_user_with_all_related_models() {
         // Create a user
         $user = User::factory()->create();
 
@@ -62,9 +61,8 @@ class UserWithRelationsTest extends TestCase
         $this->assertCount(3, $user->loginActivities);
     }
 
-    /** @test */
-    public function can_create_user_with_only_some_related_models()
-    {
+    #[Test]
+    public function can_create_user_with_only_some_related_models() {
         // Create a user
         $user = User::factory()->create();
 

@@ -5,15 +5,14 @@ namespace Tests\Unit\Models;
 use App\Models\User;
 use App\Models\UserLoginActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class UserLoginActivityTest extends TestCase
-{
+class UserLoginActivityTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_has_correct_fillable_attributes()
-    {
+    #[Test]
+    public function it_has_correct_fillable_attributes() {
         $loginActivity = new UserLoginActivity();
         $this->assertEquals([
             'user_id',
@@ -24,9 +23,8 @@ class UserLoginActivityTest extends TestCase
         ], $loginActivity->getFillable());
     }
 
-    /** @test */
-    public function it_belongs_to_user()
-    {
+    #[Test]
+    public function it_belongs_to_user() {
         $user = User::factory()->create();
         $loginActivity = UserLoginActivity::factory()->create([
             'user_id' => $user->id
@@ -36,18 +34,16 @@ class UserLoginActivityTest extends TestCase
         $this->assertEquals($user->id, $loginActivity->user->id);
     }
 
-    /** @test */
-    public function it_has_timestamps()
-    {
+    #[Test]
+    public function it_has_timestamps() {
         $loginActivity = UserLoginActivity::factory()->create();
 
         $this->assertNotNull($loginActivity->created_at);
         $this->assertNotNull($loginActivity->updated_at);
     }
 
-    /** @test */
-    public function it_has_correct_table_name()
-    {
+    #[Test]
+    public function it_has_correct_table_name() {
         $loginActivity = new UserLoginActivity();
         $this->assertEquals('user_login_activities', $loginActivity->getTable());
     }

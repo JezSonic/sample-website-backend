@@ -5,15 +5,14 @@ namespace Tests\Unit\Models;
 use App\Models\GitHubUserData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class GitHubUserDataTest extends TestCase
-{
+class GitHubUserDataTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_has_correct_fillable_attributes()
-    {
+    #[Test]
+    public function it_has_correct_fillable_attributes() {
         $githubData = new GitHubUserData();
         $this->assertEquals([
             'user_id',
@@ -54,9 +53,8 @@ class GitHubUserDataTest extends TestCase
         ], $githubData->getFillable());
     }
 
-    /** @test */
-    public function it_belongs_to_user()
-    {
+    #[Test]
+    public function it_belongs_to_user() {
         $user = User::factory()->create();
         $githubData = GitHubUserData::factory()->create([
             'user_id' => $user->id
@@ -66,16 +64,14 @@ class GitHubUserDataTest extends TestCase
         $this->assertEquals($user->id, $githubData->user->id);
     }
 
-    /** @test */
-    public function it_has_no_timestamps()
-    {
+    #[Test]
+    public function it_has_no_timestamps() {
         $githubData = new GitHubUserData();
         $this->assertFalse($githubData->timestamps);
     }
 
-    /** @test */
-    public function it_has_correct_table_name()
-    {
+    #[Test]
+    public function it_has_correct_table_name() {
         $githubData = new GitHubUserData();
         $this->assertEquals('github_user_data', $githubData->getTable());
     }

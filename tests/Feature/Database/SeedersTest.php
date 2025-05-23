@@ -6,17 +6,15 @@ use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
 use App\Models\User;
 use App\Models\UserLoginActivity;
-use App\Models\UserProfileSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class SeedersTest extends TestCase
-{
+class SeedersTest extends TestCase {
     use RefreshDatabase;
 
-    /** @test */
-    public function database_seeder_creates_test_user_with_all_related_models()
-    {
+    #[Test]
+    public function database_seeder_creates_test_user_with_all_related_models() {
         // Run the database seeder
         $this->seed();
 
@@ -42,9 +40,8 @@ class SeedersTest extends TestCase
         $this->assertCount(3, $testUser->loginActivities);
     }
 
-    /** @test */
-    public function database_seeder_creates_additional_users_with_related_models()
-    {
+    #[Test]
+    public function database_seeder_creates_additional_users_with_related_models() {
         // Run the database seeder
         $this->seed();
 

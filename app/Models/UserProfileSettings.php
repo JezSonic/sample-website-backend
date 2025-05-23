@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static updateOrCreate(array $array, array $array1)
  */
 class UserProfileSettings extends Model {
+    use HasFactory;
     public $timestamps = false;
     protected $table = 'users_profile_settings';
     protected $fillable = [

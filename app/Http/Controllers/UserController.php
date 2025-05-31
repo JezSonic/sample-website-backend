@@ -128,13 +128,13 @@ class UserController extends Controller {
      * @throws PrivateProfileException
      * @throws AccountNotFoundException
      */
-    public function show(User $user): UserResource {
+    public function show(Request $request, User $user): UserResource {
         if (User::where('id', '=', $user->id)->first() == null) {
             throw new AccountNotFoundException();
         }
 
         if (!$user->profileSettings()->first()->is_public) {
-            $authUser = Auth::user();
+            $authUser = $request->user();
             if (!is_null($authUser) && $authUser->id != $user->id) {
                 throw new PrivateProfileException();
             } else if (is_null($authUser)) {

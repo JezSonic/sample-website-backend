@@ -17,6 +17,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string $salt
  * @property int $id
+ * @property string $email_verification_token
+ * @property \Illuminate\Support\Carbon|mixed $email_verification_token_valid_for
  * @method static where(string $string, string $operator, mixed $value)
  * @method static updateOrCreate(array $array, array $array1)
  */
@@ -33,10 +35,9 @@ class User extends Authenticatable implements MustVerifyEmail {
         'name',
         'email',
         'email_verified_at',
+        'email_verification_token',
+        'email_verification_token_valid_for',
         'password',
-        'github_id',
-        'github_token',
-        'github_refresh_token'
     ];
 
     /**

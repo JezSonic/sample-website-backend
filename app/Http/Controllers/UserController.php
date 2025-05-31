@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\User\AccountNotFoundException;
+use App\Exceptions\User\InvalidTokenException;
+use App\Exceptions\User\PrivateProfileException;
 use App\Http\Requests\ProfileSettingsUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\VerifyEmailAddress;
@@ -15,6 +18,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Nette\NotImplementedException;
@@ -23,8 +27,11 @@ use Random\RandomException;
 class UserController extends Controller {
     use Response;
 
+    /**
+     * @throws Exception
+     */
     public function index(Request $request): UserResource {
-        function check_token($user, $token, $refresh_token): bool {
+        function check_token($user, $token, $refresh_token, $has_refresh_token = true): bool {
             if (is_null($user)) {
                 throw new Exception('No user provided');
             }
@@ -33,7 +40,7 @@ class UserController extends Controller {
                 throw new Exception('No token provided');
             }
 
-            if (is_null($refresh_token)) {
+            if (is_null($refresh_token) && $has_refresh_token) {
                 throw new Exception('No refresh token provided');
             }
             return true;
@@ -44,7 +51,24 @@ class UserController extends Controller {
         $user = new User()->where('id', '=', $request->user()->id)->first();
         if (array_key_exists(OAuthDrivers::GITHUB->value, $user_data)) {
             $github = $user->gitHubData()->first();
-            //@TODO: Read token validity time and refresh if expired
+            $token_check = check_token($user, $github->github_token, $github->github_refresh_token, false);
+            if ($token_check && time() > $github->github_token_expires_in) {
+                //$newToken = Socialite::driver(OAuthDrivers::GITHUB->value)->refreshToken($github->github_refresh_token);
+                $new_user_data = Socialite::driver(OAuthDrivers::GITHUB->value)->userFromToken($github->github_token);
+                GitHubUserData::updateOrCreate(
+                [
+                    'id' => $new_user_data->id,
+                ],
+                [
+                    'github_token' => $new_user_data->token,
+                    'github_refresh_token' => $new_user_data->refreshToken,
+                    'github_token_expires_in' => time() + $new_user_data->expiresIn,
+                    'github_name' => $new_user_data->name,
+                    'github_email' => $new_user_data->email,
+                    'github_avatar_url' => $new_user_data->avatar,
+                    'github_login' => $new_user_data->nickname,
+                ]);
+            }
         }
         if (array_key_exists(OAuthDrivers::GOOGLE->value, $user_data)) {
             $google = $user->googleData()->first();
@@ -65,26 +89,6 @@ class UserController extends Controller {
                 ]);
             }
         }
-//            } elseif ($provider === 'github') {
-//                $response = Http::post('https://github.com/login/oauth/access_token', [
-//                    'client_id' => config('services.github.client_id'),
-//                    'client_secret' => config('services.github.client_secret'),
-//                    'grant_type' => 'refresh_token',
-//                    'refresh_token' => $user->refresh_token,
-//                ]);
-//
-//                if ($response->successful()) {
-//                    $data = $response->json();
-//                    $user->update([
-//                            'access_token' => $data['access_token'],
-//                            'refresh_token' => $data['refresh_token']]
-//                    );
-//                } else {
-//                    Auth::logout();
-//                    throw new Exception('Failed to refresh GitHub token.');
-//                }
-//            }
-//        }
         return $user_resource;
     }
 
@@ -120,7 +124,21 @@ class UserController extends Controller {
         throw new NotImplementedException();
     }
 
+    /**
+     * @throws PrivateProfileException
+     * @throws AccountNotFoundException
+     */
     public function show(User $user): UserResource {
+        if (User::where('id', '=', $user->id)->first() == null) {
+            throw new AccountNotFoundException();
+        }
+
+        if (!$user->profileSettings()->first()->is_public) {
+            if (Auth::user()->id != $user->id) {
+                throw new PrivateProfileException();
+            }
+        }
+
         return new UserResource($user);
     }
 
@@ -153,18 +171,21 @@ class UserController extends Controller {
         }
 
         $token = null;
-        if ($user->email_verification_token != null) {
-            //TODO: CHeck token validity and return old if still valid
-            $token_valid = false;
-            if (!$token_valid) {
-                $token = bin2hex(random_bytes(16));
-                $user->email_verification_token = $token;
-                $user->save();
-            }
-        } else {
+        function generate_token(User $user): void {
             $token = bin2hex(random_bytes(16));
             $user->email_verification_token = $token;
+            $user->email_verification_token_valid_for = now()->addMinutes(15);
             $user->save();
+        }
+
+        if ($user->email_verification_token != null) {
+            if (time() < strtotime($user->email_verification_token_valid_for)) {
+                $token = $user->email_verification_token;
+            } else {
+                generate_token($user);
+            }
+        } else {
+            generate_token($user);
         }
 
         $verificationUrl = url('/api/user/verify-email/' . $token);
@@ -172,12 +193,23 @@ class UserController extends Controller {
         return $this->boolResponse(true);
     }
 
-    public function verifyEmail(Request $request, $token): JsonResponse {
-        $user = User::where('id', '=', Auth::user()->id)->first();
+    /**
+     * @throws InvalidTokenException
+     */
+    public function verifyEmail(string $token): JsonResponse {
+        // Find user by token
+        $user = User::where('email_verification_token', '=', $token)->first();
         if ($user == null) {
-            return $this->invalidCredentialsResponse();
+            throw new InvalidTokenException();
         }
-        //@TODO: Write actual logic there
+
+        // Mark email as verified
+        $user->email_verified_at = now();
+        // Clear the verification token
+        $user->email_verification_token = null;
+        $user->email_verification_token_valid_for = null;
+        $user->save();
+
         return $this->boolResponse(true);
     }
 }

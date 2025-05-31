@@ -363,7 +363,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "} elseif ($provider === 'github') {\n$response = Http::post('https:github.com/login/oauth/access_token', [\n'client_id' => config('services.github.client_id'),\n'client_secret' => config('services.github.client_secret'),\n'grant_type' => 'refresh_token',\n'refresh_token' => $user->refresh_token,\n]);\n\nif ($response->successful()) {\n$data = $response->json();\n$user->update([\n'access_token' => $data['access_token'],\n'refresh_token' => $data['refresh_token']]\n);\n} else {\nAuth::logout();\nthrow new Exception('Failed to refresh GitHub token.');\n}\n}\n}\n\n`UserResource`",
+                        "description": "`UserResource`",
                         "content": {
                             "application/json": {
                                 "schema": {

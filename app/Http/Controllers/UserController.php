@@ -191,7 +191,7 @@ class UserController extends Controller {
             generate_token($user);
         }
 
-        $verificationUrl = url('/api/user/verify-email/' . $token);
+        $verificationUrl = env("APP_DOMAIN") . '/user/verify-email/';
         Mail::to($user)->send(new VerifyEmailAddress($verificationUrl));
         return $this->boolResponse(true);
     }

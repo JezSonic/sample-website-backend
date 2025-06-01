@@ -47,7 +47,7 @@ return [
         /*
          * API version.
          */
-        'version' => env('API_VERSION', '1.4.5'),
+        'version' => env('API_VERSION', '1.5.0'),
 
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
@@ -101,6 +101,7 @@ return [
      */
     'servers' => [
         'local' => 'http://localhost:81',
+        'production' => 'https://server.newdev.pl',
     ],
 
     'middleware' => [

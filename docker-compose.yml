@@ -18,7 +18,7 @@ services:
         source: ./
         target: /var/www/backend
   mysql:
-    image: 'mysql:8.4.4'
+    image: 'mysql:8.4.5'
     container_name: mysql-dev
     restart: always
     networks:
@@ -35,7 +35,7 @@ services:
     volumes:
       - 'mysql:/var/lib/mysql'
   redis:
-    image: 'redis:7.4.1'
+    image: 'redis:8.0'
     container_name: redis-dev
     restart: always
     command: ["redis-server", "/etc/redis/redis.conf"]

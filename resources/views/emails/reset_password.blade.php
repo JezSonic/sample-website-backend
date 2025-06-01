@@ -43,18 +43,18 @@
 </head>
 <body>
 <div class="container">
-    <h1>Witaj w {{ config('app.name') }}!</h1>
+    <h1>Resetowanie hasła w {{ config('app.name') }}</h1>
 
-    <p>Dziękujemy za rejestrację. Aby dokończyć konfigurację konta, kliknij poniższy przycisk, aby zweryfikować swój adres e-mail:</p>
+    <p>Przyjęliśmy zgłoszenie resetowania zapomnianego hasła. </p>
 
     <p style="text-align: center;">
-        <a href="{{ $verificationUrl }}" class="button">Zweryfikuj adres e-mail</a>
+        <a href="{{ $reset_password_url }}" class="button">Zmień swoje hasło</a>
     </p>
     <p><i>Podany link jest ważny do {{ $valid_until }}</i></p>
     <p>Jeśli przycisk nie działa, skopiuj i wklej poniższy link do paska adresu przeglądarki:</p>
-    <p><a href="{{ $verificationUrl }}">{{ $verificationUrl }}</a></p>
+    <p><a href="{{ $reset_password_url }}">{{ $reset_password_url }}</a></p>
 
-    <p>Jeśli nie zakładałeś/aś konta w {{ config('app.name') }}, możesz zignorować tę wiadomość.</p>
+    <p>Jeśli nie prosiłeś o zresetowanie hasła dla swojego konta w {{ config('app.name') }}, możesz bezpiecznie zignorować tę wiadomość.</p>
 
     <p>Dziękujemy,<br>Zespół {{ config('app.name') }}</p>
 

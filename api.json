@@ -1,7 +1,7 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "NewDEV",
+        "title": "New DEV",
         "version": "1.4.5"
     },
     "servers": [
@@ -11,6 +11,169 @@
         }
     ],
     "paths": {
+        "/api/auth/change-password": {
+            "patch": {
+                "operationId": "auth.changePassword",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/api/auth/reset-password": {
+            "post": {
+                "operationId": "auth.forgotPassword",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/reset-password/verify-token": {
+            "post": {
+                "operationId": "auth.verifyPasswordResetToken",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyPasswordResetTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "/api/auth/reset-password/request": {
+            "post": {
+                "operationId": "auth.requestChangePassword",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangePasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
         "/api/auth/register": {
             "post": {
                 "operationId": "auth.register",
@@ -589,6 +752,20 @@
     },
     "components": {
         "schemas": {
+            "ChangePasswordRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email for the account to reset password for. Password-reset email link will be sent ot this email"
+                    }
+                },
+                "required": [
+                    "email"
+                ],
+                "title": "ChangePasswordRequest"
+            },
             "GitHubUserDataResource": {
                 "type": "object",
                 "properties": {
@@ -996,6 +1173,19 @@
                     "updated_at"
                 ],
                 "title": "UserResource"
+            },
+            "VerifyPasswordResetTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Token to be sent for verification"
+                    }
+                },
+                "required": [
+                    "token"
+                ],
+                "title": "VerifyPasswordResetTokenRequest"
             }
         },
         "responses": {

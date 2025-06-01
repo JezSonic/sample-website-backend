@@ -15,11 +15,15 @@ use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
 use App\Utils\Traits\Response;
 use Exception;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Nette\NotImplementedException;
 use Random\RandomException;
@@ -167,32 +171,35 @@ class UserController extends Controller {
     /**
      * @throws RandomException
      */
-    public function sendVerificationEmail(Request $request): JsonResponse {
+    public function sendVerificationEmail(): JsonResponse {
         $user = User::where('id', '=', Auth::user()->id)->first();
         if ($user == null) {
             return $this->invalidCredentialsResponse();
         }
 
-        $token = null;
-        function generate_token(User $user): void {
-            $token = bin2hex(random_bytes(16));
-            $user->email_verification_token = $token;
+        function generate_token(User $user): string {
+            $_token = bin2hex(random_bytes(16));
+            $user->email_verification_token = $_token;
             $user->email_verification_token_valid_for = now()->addMinutes(15);
             $user->save();
+            return $_token;
         }
 
         if ($user->email_verification_token != null) {
             if (time() < strtotime($user->email_verification_token_valid_for)) {
+                $valid_until = $user->email_verification_token_valid_for;
                 $token = $user->email_verification_token;
             } else {
-                generate_token($user);
+                $token = generate_token($user);
+                $valid_until = now()->addMinutes(15);
             }
         } else {
-            generate_token($user);
+            $token = generate_token($user);
+            $valid_until = now()->addMinutes(15);
         }
 
-        $verificationUrl = env("APP_DOMAIN") . '/user/verify-email/';
-        Mail::to($user)->send(new VerifyEmailAddress($verificationUrl));
+        $verificationUrl = env("APP_DOMAIN") . '/auth/verify-email/' . $token;
+        Mail::to($user)->send(new VerifyEmailAddress($verificationUrl, $valid_until));
         return $this->boolResponse(true);
     }
 

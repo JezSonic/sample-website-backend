@@ -9,16 +9,16 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class VerifyEmailAddress extends Mailable {
+class ResetPassword extends Mailable {
     use Queueable, SerializesModels;
-    private ?string $verificationUrl;
+    private ?string $reset_password_url;
     private ?string $valid_until;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(string $verificationUrl, $valid_until) {
-        $this->verificationUrl = $verificationUrl;
+    public function __construct(string $reset_password_url, $valid_until) {
+        $this->reset_password_url = $reset_password_url;
         $this->valid_until = $valid_until;
     }
 
@@ -27,7 +27,7 @@ class VerifyEmailAddress extends Mailable {
      */
     public function envelope(): Envelope {
         return new Envelope(
-            subject: 'Verify email address for your ' . config('app.name') . ' account',
+            subject: 'Reset password for your ' . config('app.name') . ' account',
         );
     }
 
@@ -36,9 +36,9 @@ class VerifyEmailAddress extends Mailable {
      */
     public function content(): Content {
         return new Content(
-            view: 'emails.verify_email',
+            view: 'emails.reset_password',
             with: [
-                'verificationUrl' => $this->verificationUrl,
+                'reset_password_url' => $this->reset_password_url,
                 'valid_until' => $this->valid_until,
             ]
         );

@@ -19,6 +19,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $email_verification_token
  * @property \Illuminate\Support\Carbon|mixed $email_verification_token_valid_for
+ * @property string $password_reset_token
+ * @property \Illuminate\Support\Carbon|mixed $password_reset_token_valid_for
  * @method static where(string $string, string $operator, mixed $value)
  * @method static updateOrCreate(array $array, array $array1)
  */
@@ -38,6 +40,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         'email_verification_token',
         'email_verification_token_valid_for',
         'password',
+        'password_reset_token',
+        'password_reset_token_valid_for',
     ];
 
     /**

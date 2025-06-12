@@ -155,15 +155,32 @@ class UserController extends Controller {
 
     public function destroy(Request $request): JsonResponse {
         $user = Auth::user();
-        $db_user = User::where('id', '=', $user->id);
+        $db_user = User::where('id', '=', $user->id)->first();
         if ($db_user == null) {
             return $this->invalidCredentialsResponse();
         }
 
-        $db_user->googleData()->delete();
-        $db_user->profileSettings()->delete();
-        $db_user->githubData()->delete();
-        $db_user->loginActivities()->delete();
+        $googleData = $db_user->googleData();
+        $profileSettings = $db_user->profileSettings();
+        $githubData = $db_user->githubData();
+        $loginActivities = $db_user->loginActivities();
+
+        if ($googleData->first() != null) {
+            $googleData->delete();
+        }
+
+        if ($profileSettings->first() != null) {
+            $profileSettings->delete();
+        }
+
+        if ($githubData->first() != null) {
+            $githubData->delete();
+        }
+
+        if ($loginActivities->first() != null) {
+            $loginActivities->delete();
+        }
+
         $db_user->delete();
         return $this->boolResponse(true);
     }

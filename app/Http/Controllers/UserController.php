@@ -7,6 +7,7 @@ use App\Exceptions\User\InvalidTokenException;
 use App\Exceptions\User\PrivateProfileException;
 use App\Http\Requests\ProfileSettingsUpdateRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\ExportUserDataJob;
 use App\Mail\VerifyEmailAddress;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
@@ -23,10 +24,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Nette\NotImplementedException;
 use Random\RandomException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller {
     use Response;
@@ -237,6 +240,13 @@ class UserController extends Controller {
         $user->email_verification_token_valid_for = null;
         $user->save();
 
+        return $this->boolResponse(true);
+    }
+
+    public function exportUserData(Request $request): JsonResponse {
+        $user = $request->user();
+        $user = User::where('id', '=', $user->id)->first();
+        ExportUserDataJob::dispatch($user);
         return $this->boolResponse(true);
     }
 }

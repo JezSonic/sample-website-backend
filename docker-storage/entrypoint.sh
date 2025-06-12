@@ -35,5 +35,6 @@ printf "\033[36m[Backend] => \033[0mStarting web services...\n"
 service apache2 start
 service supervisor start
 service cron start
+php artisan queue:work & disown
 printf "\033[36m[Backend] => \033[0mEntering running state...\n"
 tail -f /dev/null

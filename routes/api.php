@@ -6,6 +6,7 @@ use App\Http\Controllers\UserLoginActivityController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', [UserController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/user/export-data', [UserController::class, 'exportUserData'])->middleware('auth:sanctum');
 Route::patch('/user', [UserController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/user', [UserController::class, 'destroy'])->middleware('auth:sanctum');
 Route::patch('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');

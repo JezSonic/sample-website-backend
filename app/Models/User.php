@@ -23,6 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property \Illuminate\Support\Carbon|mixed $password_reset_token_valid_for
  * @method static where(string $string, string $operator, mixed $value)
  * @method static updateOrCreate(array $array, array $array1)
+ * @method static find(int $id)
  */
 class User extends Authenticatable implements MustVerifyEmail {
     /** @use HasFactory<UserFactory> */

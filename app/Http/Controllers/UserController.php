@@ -12,23 +12,22 @@ use App\Mail\VerifyEmailAddress;
 use App\Models\GitHubUserData;
 use App\Models\GoogleUserData;
 use App\Models\User;
+use App\Models\UserDataExports;
 use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
+use App\Utils\Enums\UserDataExportStatus;
 use App\Utils\Traits\Response;
 use Exception;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 use Nette\NotImplementedException;
 use Random\RandomException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller {
@@ -246,7 +245,68 @@ class UserController extends Controller {
     public function exportUserData(Request $request): JsonResponse {
         $user = $request->user();
         $user = User::where('id', '=', $user->id)->first();
+        $check = UserDataExports::where('user_id', '=', $user->id)->first();
+        if ($check == null) {
+            $userDataExports = new UserDataExports([
+                'user_id' => $user->id,
+                'valid_until' => now()->addDays(),
+                'status' => UserDataExportStatus::QUEUED->value,
+            ]);
+            $userDataExports->save();
+        }
+
         ExportUserDataJob::dispatch($user);
         return $this->boolResponse(true);
+    }
+
+
+    /**
+     * @param int $userId
+     * @response array{status: UserDataExportStatus}
+     * @return JsonResponse|StreamedResponse
+     */
+    public function downloadExportedData(int $userId): JsonResponse|StreamedResponse {
+        /** @var UserDataExportStatus $dataStatus */
+        $dataStatus = UserDataExports::where('user_id', '=', $userId)->first()->status;
+
+        if ($dataStatus != UserDataExportStatus::COMPLETED->value) {
+            return response()->json([
+                /**
+                 * Status of requested user data export operation
+                 * @type UserDataExportStatus
+                 */
+                'status' => $dataStatus,
+            ]);
+        }
+
+        Log::info("DownloadExportedData: Downloading data for user ID: {$userId}");
+        if (!Storage::exists("exports/" . $userId . "/data.zip")) {
+            return response()->json([
+                /**
+                 * Returned in case when data to be downloaded was not found
+                 */
+               'status' => UserDataExportStatus::NOT_FOUND->value
+            ], 404);
+        }
+
+        return Storage::download("exports/" . $userId . "/data.zip", "data.zip");
+    }
+
+    /**
+     * @param int $userId
+     * @response array{status: UserDataExportStatus, valid_until: int}
+     * @return JsonResponse
+     */
+    public function checkExportDataStatus(int $userId): JsonResponse {
+        /** @var UserDataExportStatus $dataStatus */
+        $exports = UserDataExports::where('user_id', '=', $userId)->first();
+        return response()->json([
+            /**
+             * Status of requested user data export operation
+             * @type UserDataExportStatus
+             */
+            'status' => $exports->status,
+            'valid_until' => strtotime($exports->valid_until),
+        ]);
     }
 }

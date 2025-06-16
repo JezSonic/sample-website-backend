@@ -654,6 +654,86 @@
                 }
             }
         },
+        "/api/user/{userId}/export-data/download": {
+            "get": {
+                "operationId": "user.downloadExportedData",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "$ref": "#/components/schemas/UserDataExportStatus"
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/{userId}/export-data/status": {
+            "get": {
+                "operationId": "user.checkExportDataStatus",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "$ref": "#/components/schemas/UserDataExportStatus"
+                                        },
+                                        "valid_until": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "valid_until"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/verify-email": {
             "post": {
                 "operationId": "user.sendVerificationEmail",
@@ -1084,6 +1164,17 @@
                     "password"
                 ],
                 "title": "RegisterRequest"
+            },
+            "UserDataExportStatus": {
+                "type": "string",
+                "enum": [
+                    "processing",
+                    "completed",
+                    "failed",
+                    "queued",
+                    "not_found"
+                ],
+                "title": "UserDataExportStatus"
             },
             "UserLoginActivityResource": {
                 "type": "object",

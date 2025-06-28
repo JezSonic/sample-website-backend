@@ -21,10 +21,11 @@ class UserTest extends TestCase {
             'name',
             'email',
             'email_verified_at',
+            'email_verification_token',
+            'email_verification_token_valid_for',
             'password',
-            'github_id',
-            'github_token',
-            'github_refresh_token'
+            'password_reset_token',
+            'password_reset_token_valid_for',
         ], $user->getFillable());
     }
 

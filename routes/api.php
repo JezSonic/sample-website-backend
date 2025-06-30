@@ -11,8 +11,7 @@ Route::get('/user/{userId}/export-data/download', [UserController::class, 'downl
 Route::get('/user/{userId}/export-data/status', [UserController::class, 'checkExportDataStatus']);
 Route::patch('/user', [UserController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/user', [UserController::class, 'destroy'])->middleware('auth:sanctum');
-Route::patch('/auth/change-password', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
-Route::post('/auth/reset-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthController::class, 'changePassword']);
 Route::post('/auth/reset-password/verify-token', [AuthController::class, 'verifyPasswordResetToken']);
 Route::post('/auth/reset-password/request', [AuthController::class, 'requestChangePassword']);
 Route::post('/user/verify-email', [UserController::class, 'sendVerificationEmail'])->middleware('auth:sanctum');

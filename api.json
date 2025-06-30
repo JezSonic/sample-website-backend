@@ -278,6 +278,9 @@
                             }
                         }
                     },
+                    "500": {
+                        "$ref": "#/components/responses/OAuthAccountPasswordLoginException"
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     }
@@ -606,17 +609,6 @@
                         "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
-            },
-            "post": {
-                "operationId": "user.store",
-                "tags": [
-                    "User"
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                }
             }
         },
         "/api/user/export-data": {
@@ -720,7 +712,7 @@
                                             "$ref": "#/components/schemas/UserDataExportStatus"
                                         },
                                         "valid_until": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     },
                                     "required": [
@@ -1168,10 +1160,10 @@
             "UserDataExportStatus": {
                 "type": "string",
                 "enum": [
+                    "queued",
                     "processing",
                     "completed",
                     "failed",
-                    "queued",
                     "not_found"
                 ],
                 "title": "UserDataExportStatus"
@@ -1306,6 +1298,9 @@
                     },
                     "profile_settings": {
                         "$ref": "#/components/schemas/UserProfileSettingsResource"
+                    },
+                    "has_password": {
+                        "type": "boolean"
                     }
                 },
                 "required": [
@@ -1314,7 +1309,8 @@
                     "email",
                     "email_verified_at",
                     "created_at",
-                    "updated_at"
+                    "updated_at",
+                    "has_password"
                 ],
                 "title": "UserResource"
             },
@@ -1384,6 +1380,25 @@
             },
             "ModelNotFoundException": {
                 "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "OAuthAccountPasswordLoginException": {
+                "description": "OAuth Authentication exception",
                 "content": {
                     "application/json": {
                         "schema": {

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @method static where(string $column, string $operator, mixed $value)
  * @method static select(array $columns)
+ * @method static create(array $array)
  */
 class UserLoginActivity extends Model {
     use HasFactory;

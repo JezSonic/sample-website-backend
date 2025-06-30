@@ -25,9 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
-use Nette\NotImplementedException;
 use Random\RandomException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller {
@@ -122,37 +120,20 @@ class UserController extends Controller {
         return $this->boolResponse(true);
     }
 
-    public function create() {
-        throw new NotImplementedException();
-    }
-
-    public function store(Request $request) {
-        throw new NotImplementedException();
-    }
-
     /**
      * @throws PrivateProfileException
      * @throws AccountNotFoundException
      */
-    public function show(Request $request, User $user): UserResource {
+    public function show(User $user): UserResource {
         if (User::where('id', '=', $user->id)->first() == null) {
             throw new AccountNotFoundException();
         }
 
         if (!$user->profileSettings()->first()->is_public) {
-            $authUser = $request->user();
-            if (!is_null($authUser) && $authUser->id != $user->id) {
-                throw new PrivateProfileException();
-            } else if (is_null($authUser)) {
-                throw new PrivateProfileException();
-            }
+            throw new PrivateProfileException();
         }
 
         return new UserResource($user);
-    }
-
-    public function edit(User $user) {
-        throw new NotImplementedException();
     }
 
     public function destroy(Request $request): JsonResponse {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
+use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
 use App\Exceptions\User\InvalidTokenException;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
@@ -177,6 +178,7 @@ class AuthController extends Controller {
     /**
      * @param LoginRequest $request
      * @return JsonResponse
+     * @throws OAuthAccountPasswordLoginException
      * @noinspection PhpUnitAnnotationToAttributeInspection
      * @uses         User::getSalt()
      */
@@ -191,7 +193,13 @@ class AuthController extends Controller {
             return $this->invalidCredentialsResponse();
         }
 
-        $attempt = Auth::attempt(['email' => $data['email'], 'password' => $data['password'] . $user_check->getSalt()]);
+        $_salt = $user_check->getSalt();
+        // Check if account was created using OAuth (no salt means OAuth account)
+        if ($_salt === null) {
+            throw new OAuthAccountPasswordLoginException();
+        }
+
+        $attempt = Auth::attempt(['email' => $data['email'], 'password' => $data['password'] . $_salt]);
         if (!$attempt) {
             return $this->invalidCredentialsResponse();
         }
@@ -300,23 +308,23 @@ class AuthController extends Controller {
         return $this->boolResponse(true);
     }
 
+    /**
+     * @throws InvalidTokenException
+     */
     public function changePassword(Request $request): JsonResponse {
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
-                $user->save();
-                event(new PasswordReset($user));
-            }
-        );
-        return $status === Password::PASSWORD_RESET ? $this->boolResponse(true) : $this->boolResponse(false);
-    }
-
-    public function forgotPassword(Request $request): JsonResponse {
-        $status = Password::sendResetLink($request->only('email'));
-        return $status === Password::RESET_LINK_SENT ? $this->boolResponse(true) : $this->boolResponse(false);
+        $data = $request->all();
+        $user = User::where('password_reset_token', '=', $data['token'])->first();
+        if ($user == null) {
+            throw new InvalidTokenException();
+        }
+        $salt = Str::random();
+        $hashed = Hash::make($data['password'] . $salt);
+        $user->password = $hashed;
+        $user->salt = $salt;
+        $user->password_reset_token = null;
+        $user->password_reset_token_valid_for = null;
+        $user->save();
+        return $this->boolResponse(true);
     }
 
     /**
@@ -329,12 +337,15 @@ class AuthController extends Controller {
             throw new InvalidTokenException();
         } else {
             if (time() > strtotime($user->password_reset_token_valid_for)) {
+                $is_creating_password = ($user->getSalt() == null);
                 $user->password_reset_token = null;
                 $user->password_reset_token_valid_for = null;
                 $user->save();
-                return $this->boolResponse(false);
+                return response()->json(['content' => false, 'creating_password' => $is_creating_password]);
             }
         }
-        return $this->boolResponse(true);
+
+        $is_creating_password = ($user->getSalt() == null);
+        return response()->json(['content' => true, 'creating_password' => $is_creating_password]);
     }
 }

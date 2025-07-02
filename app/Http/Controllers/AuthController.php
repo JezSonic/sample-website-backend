@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
+use App\Exceptions\User\InvalidRefreshTokenException;
 use App\Exceptions\User\InvalidTokenException;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller {
@@ -162,7 +164,23 @@ class AuthController extends Controller {
         ]);
         $activity->save();
 
-        return response()->json(['content' => $user->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
+        // Create access token (expires in 1 hour)
+
+        //@TODO: Create a job to clear leftover tokens
+        $accessToken = Auth::user()->createToken('access_token', ['*'], now()->addHour());
+
+        // Create refresh token (expires in 30 days)
+        $refreshToken = Auth::user()->createToken('refresh_token', ['refresh'], now()->addDays(30));
+
+        //@TODO: Create a job to clear leftover tokens
+
+        return response()->json([
+            'id' => $user->id,
+            'access_token' => $accessToken->plainTextToken,
+            'refresh_token' => $refreshToken->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600 // 1 hour in seconds
+        ]);
     }
 
     /**
@@ -219,7 +237,23 @@ class AuthController extends Controller {
         ]);
         $activity->save();
 
-        return response()->json(['content' => $user_check->id, 'token' => Auth::user()->createToken('authToken')->plainTextToken]);
+        //@TODO: Create a job to clear leftover tokens
+
+        // Create access token (expires in 1 hour)
+        $accessToken = Auth::user()->createToken('access_token', ['*'], now()->addHour());
+
+        // Create refresh token (expires in 30 days)
+
+        //@TODO: Create a job to clear leftover tokens
+        $refreshToken = Auth::user()->createToken('refresh_token', ['refresh'], now()->addDays(30));
+
+        return response()->json([
+            'id' => $user_check->id,
+            'access_token' => $accessToken->plainTextToken,
+            'refresh_token' => $refreshToken->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600 // 1 hour in seconds
+        ]);
     }
 
     /**
@@ -260,6 +294,73 @@ class AuthController extends Controller {
     function logout(Request $request): JsonResponse {
         Auth::user()?->tokens()->delete();
         $request->session()->invalidate();
+        return $this->boolResponse(true)->withoutCookie('newdev_token');
+    }
+
+    /**
+     * Refresh access token using refresh token
+     * @throws InvalidRefreshTokenException
+     */
+    function refreshToken(Request $request): JsonResponse {
+        $request->validate([
+            'refresh_token' => 'required|string'
+        ]);
+
+        $refreshToken = $request->input('refresh_token');
+
+        // Find the refresh token in the database
+        $tokenModel = PersonalAccessToken::findToken($refreshToken);
+
+        if (!$tokenModel || $tokenModel->name !== 'refresh_token') {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Check if refresh token is expired
+        if ($tokenModel->expires_at && $tokenModel->expires_at->isPast()) {
+            $tokenModel->delete();
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Check if refresh token has the correct ability
+        if (!$tokenModel->can('refresh')) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        $user = $tokenModel->tokenable;
+
+        // Delete old access tokens (keep refresh tokens)
+        $user->tokens()->where('name', 'access_token')->delete();
+
+        //@TODO: Create a job to clear leftover tokens
+        $accessToken = $user->createToken('access_token', ['*'], now()->addHour());
+        $tokenModel->forceFill(['last_used_at' => now()])->save();
+        return response()->json([
+            'access_token' => $accessToken->plainTextToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600 // 1 hour in seconds
+        ]);
+    }
+
+    /**
+     * Revoke a specific refresh token
+     * @throws InvalidRefreshTokenException
+     */
+    function revokeRefreshToken(Request $request): JsonResponse {
+        $request->validate([
+            'refresh_token' => 'required|string'
+        ]);
+
+        $refreshToken = $request->input('refresh_token');
+
+        // Find the refresh token in the database
+        $tokenModel = PersonalAccessToken::findToken($refreshToken);
+
+        if (!$tokenModel || $tokenModel->name !== 'refresh_token') {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Delete the refresh token
+        $tokenModel->delete();
         return $this->boolResponse(true)->withoutCookie('newdev_token');
     }
 

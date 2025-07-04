@@ -17,6 +17,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller {
@@ -41,14 +42,14 @@ class UserController extends Controller {
      */
     public function update(ProfileSettingsUpdateRequest $request): JsonResponse {
         $data = $request->all();
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
         UserService::updateUserProfile($user, $data);
         return $this->boolResponse(true);
     }
 
     public function updateNotifications(NotificationsUpdateRequest $request): JsonResponse {
         $data = $request->all();
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
         $user->profileSettings()->update($data);
         return $this->boolResponse(true);
     }
@@ -72,7 +73,7 @@ class UserController extends Controller {
      * @return JsonResponse Response indicating success
      */
     public function destroy(Request $request): JsonResponse {
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
 
         if (!UserService::deleteUserAccount($user)) {
             return $this->invalidCredentialsResponse();
@@ -85,9 +86,10 @@ class UserController extends Controller {
      * Send a verification email to the authenticated user
      *
      * @return JsonResponse Response indicating success
+     * @throws RandomException
      */
     public function sendVerificationEmail(Request $request): JsonResponse {
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
 
         if ($user == null) {
             return $this->invalidCredentialsResponse();
@@ -116,7 +118,7 @@ class UserController extends Controller {
      * @return JsonResponse Response indicating success
      */
     public function exportUserData(Request $request): JsonResponse {
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
         UserService::requestDataExport($user);
         return $this->boolResponse(true);
     }

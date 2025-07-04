@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\PersonalAccessToken;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -174,5 +175,38 @@ class AuthControllerTest extends TestCase
         // Verify all tokens are deleted
         $this->assertNull(PersonalAccessToken::findToken($accessToken->plainTextToken));
         $this->assertNull(PersonalAccessToken::findToken($refreshToken->plainTextToken));
+    }
+    #[Test]
+    public function revoke_oauth_uses_find_method()
+    {
+        // Create a user
+        $user = User::factory()->create();
+
+        // Start query logging
+        DB::enableQueryLog();
+
+        // Call the revokeOAuth method
+        $response = $this->actingAs($user, 'sanctum')
+            ->deleteJson('/api/auth/oauth/github');
+
+        // Get query log
+        $queryLog = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        // Assert response
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'true'
+            ]);
+
+        // Assert that find() was used instead of where()->first()
+        $findUsed = false;
+        foreach ($queryLog as $query) {
+            if (str_contains($query['query'], 'select * from `users` where `id` = ? limit 1')) {
+                $findUsed = true;
+                break;
+            }
+        }
+        $this->assertTrue($findUsed, 'find() method was not used');
     }
 }

@@ -21,6 +21,7 @@ use App\Utils\Services\TokenService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Random\RandomException;
 
 class AuthController extends Controller {
     use Response;
@@ -155,7 +156,7 @@ class AuthController extends Controller {
      * @throws UnsupportedDriver If the driver is not supported
      */
     function revokeOAuth(Request $request, OAuthDrivers $driver): JsonResponse {
-        $user = User::where('id', '=', $request->user()->id)->first();
+        $user = User::find($request->user()->id);
         OAuthService::revokeOAuth($driver, $user);
         return $this->boolResponse(true);
     }
@@ -165,6 +166,7 @@ class AuthController extends Controller {
      *
      * @param ChangePasswordRequest $request The password reset request
      * @return JsonResponse Response indicating success
+     * @throws RandomException
      */
     public function requestChangePassword(ChangePasswordRequest $request): JsonResponse {
         $email = $request->input('email');

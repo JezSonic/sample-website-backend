@@ -5,289 +5,150 @@ namespace App\Http\Controllers;
 use App\Exceptions\User\AccountNotFoundException;
 use App\Exceptions\User\InvalidTokenException;
 use App\Exceptions\User\PrivateProfileException;
+use App\Http\Requests\NotificationsUpdateRequest;
 use App\Http\Requests\ProfileSettingsUpdateRequest;
 use App\Http\Resources\UserResource;
-use App\Jobs\ExportUserDataJob;
-use App\Mail\VerifyEmailAddress;
-use App\Models\GitHubUserData;
-use App\Models\GoogleUserData;
 use App\Models\User;
-use App\Models\UserDataExports;
-use App\Models\UserProfileSettings;
-use App\Utils\Enums\OAuthDrivers;
 use App\Utils\Enums\UserDataExportStatus;
+use App\Utils\Services\EmailVerificationService;
+use App\Utils\Services\UserService;
 use App\Utils\Traits\Response;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Socialite\Facades\Socialite;
-use Random\RandomException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller {
     use Response;
 
     /**
-     * @throws Exception
+     * Get the authenticated user's profile
+     *
+     * @param Request $request The request object
+     * @return UserResource The user resource
+     * @throws Exception If token validation fails
      */
     public function index(Request $request): UserResource {
-        function check_token($user, $token, $refresh_token, $has_refresh_token = true): bool {
-            if (is_null($user)) {
-                throw new Exception('No user provided');
-            }
-
-            if (is_null($token)) {
-                throw new Exception('No token provided');
-            }
-
-            if (is_null($refresh_token) && $has_refresh_token) {
-                throw new Exception('No refresh token provided');
-            }
-            return true;
-        }
-
-        $user_resource = new UserResource($request->user());
-        $user_data = json_decode(json_encode($user_resource), true);
-        $user = new User()->where('id', '=', $request->user()->id)->first();
-        if (array_key_exists(OAuthDrivers::GITHUB->value, $user_data)) {
-            $github = $user->gitHubData()->first();
-            $token_check = check_token($user, $github->github_token, $github->github_refresh_token, false);
-            if ($token_check && time() > $github->github_token_expires_in) {
-                //$newToken = Socialite::driver(OAuthDrivers::GITHUB->value)->refreshToken($github->github_refresh_token);
-                $new_user_data = Socialite::driver(OAuthDrivers::GITHUB->value)->userFromToken($github->github_token);
-                GitHubUserData::updateOrCreate(
-                [
-                    'id' => $new_user_data->id,
-                ],
-                [
-                    'github_token' => $new_user_data->token,
-                    'github_refresh_token' => $new_user_data->refreshToken,
-                    'github_token_expires_in' => time() + $new_user_data->expiresIn,
-                    'github_name' => $new_user_data->name,
-                    'github_email' => $new_user_data->email,
-                    'github_avatar_url' => $new_user_data->avatar,
-                    'github_login' => $new_user_data->nickname,
-                ]);
-            }
-        }
-        if (array_key_exists(OAuthDrivers::GOOGLE->value, $user_data)) {
-            $google = $user->googleData()->first();
-            $token_check = check_token($user, $google->google_token, $google->google_refresh_token);
-            if ($token_check && time() > $google->google_token_expires_in) {
-                $newToken = Socialite::driver(OAuthDrivers::GOOGLE->value)->refreshToken($google->google_refresh_token);
-                $new_user_data = Socialite::driver(OAuthDrivers::GOOGLE->value)->userFromToken($newToken->token);
-                GoogleUserData::updateOrCreate(
-                [
-                    'id' => $new_user_data->id,
-                ],
-                [
-                    'google_token' => $newToken->token,
-                    'google_refresh_token' => $newToken->refreshToken,
-                    'google_name' => $new_user_data->name,
-                    'google_email' => $new_user_data->email,
-                    'google_avatar_url' => $new_user_data->avatar,
-                ]);
-            }
-        }
-        return $user_resource;
+        return UserService::getUserProfile($request->user());
     }
 
+    /**
+     * Update the authenticated user's profile settings
+     *
+     * @param ProfileSettingsUpdateRequest $request The profile update request
+     * @return JsonResponse Response indicating success
+     */
     public function update(ProfileSettingsUpdateRequest $request): JsonResponse {
         $data = $request->all();
-        $user = User::where('id', '=', Auth::user()->id)->first();
-        $user_profile_settings = $user->profileSettings()->first();
-        if ($user_profile_settings == null) {
-            $user_profile_settings = new UserProfileSettings();
-            $user_profile_settings->user_id = $user->id;
-        }
-        if ($data['name'] != '' && $data['name'] != null) {
-            $user->name = $data['name'];
-            $user->save();
-        }
+        $user = User::where('id', '=', $request->user()->id)->first();
+        UserService::updateUserProfile($user, $data);
+        return $this->boolResponse(true);
+    }
 
-        $user_profile_settings->avatar_source = $data['avatar_source'];
-        $user_profile_settings->is_public = $data['is_public'];
-        $user_profile_settings->language = $data['language'];
-        $user_profile_settings->theme = $data['theme'];
-        $user_profile_settings->email_notifications = $data['notifications']['email_notifications'];
-        $user_profile_settings->email_marketing = $data['notifications']['email_marketing'];
-        $user_profile_settings->email_security_alerts = $data['notifications']['email_security_alerts'];
-        $user_profile_settings->save();
+    public function updateNotifications(NotificationsUpdateRequest $request): JsonResponse {
+        $data = $request->all();
+        $user = User::where('id', '=', $request->user()->id)->first();
+        $user->profileSettings()->update($data);
         return $this->boolResponse(true);
     }
 
     /**
-     * @throws PrivateProfileException
-     * @throws AccountNotFoundException
+     * Get a user's public profile
+     *
+     * @param User $user The user to get the profile for
+     * @return UserResource The user resource
+     * @throws PrivateProfileException If the user's profile is private
+     * @throws AccountNotFoundException If the user doesn't exist
      */
     public function show(User $user): UserResource {
-        if (User::where('id', '=', $user->id)->first() == null) {
-            throw new AccountNotFoundException();
-        }
-
-        if (!$user->profileSettings()->first()->is_public) {
-            throw new PrivateProfileException();
-        }
-
-        return new UserResource($user);
+        return UserService::getPublicProfile($user);
     }
 
+    /**
+     * Delete the authenticated user's account
+     *
+     * @param Request $request The request object
+     * @return JsonResponse Response indicating success
+     */
     public function destroy(Request $request): JsonResponse {
-        $user = Auth::user();
-        $db_user = User::where('id', '=', $user->id)->first();
-        if ($db_user == null) {
+        $user = User::where('id', '=', $request->user()->id)->first();
+
+        if (!UserService::deleteUserAccount($user)) {
             return $this->invalidCredentialsResponse();
         }
 
-        $googleData = $db_user->googleData();
-        $profileSettings = $db_user->profileSettings();
-        $githubData = $db_user->githubData();
-        $loginActivities = $db_user->loginActivities();
-
-        if ($googleData->first() != null) {
-            $googleData->delete();
-        }
-
-        if ($profileSettings->first() != null) {
-            $profileSettings->delete();
-        }
-
-        if ($githubData->first() != null) {
-            $githubData->delete();
-        }
-
-        if ($loginActivities->first() != null) {
-            $loginActivities->delete();
-        }
-
-        $db_user->delete();
         return $this->boolResponse(true);
     }
 
     /**
-     * @throws RandomException
+     * Send a verification email to the authenticated user
+     *
+     * @return JsonResponse Response indicating success
      */
-    public function sendVerificationEmail(): JsonResponse {
-        $user = User::where('id', '=', Auth::user()->id)->first();
+    public function sendVerificationEmail(Request $request): JsonResponse {
+        $user = User::where('id', '=', $request->user()->id)->first();
+
         if ($user == null) {
             return $this->invalidCredentialsResponse();
         }
 
-        function generate_token(User $user): string {
-            $_token = bin2hex(random_bytes(16));
-            $user->email_verification_token = $_token;
-            $user->email_verification_token_valid_for = now()->addMinutes(15);
-            $user->save();
-            return $_token;
-        }
-
-        if ($user->email_verification_token != null) {
-            if (time() < strtotime($user->email_verification_token_valid_for)) {
-                $valid_until = $user->email_verification_token_valid_for;
-                $token = $user->email_verification_token;
-            } else {
-                $token = generate_token($user);
-                $valid_until = now()->addMinutes(15);
-            }
-        } else {
-            $token = generate_token($user);
-            $valid_until = now()->addMinutes(15);
-        }
-
-        $verificationUrl = env("APP_DOMAIN") . '/auth/verify-email/' . $token;
-        Mail::to($user)->send(new VerifyEmailAddress($verificationUrl, $valid_until));
+        EmailVerificationService::sendVerificationEmail($user);
         return $this->boolResponse(true);
     }
 
     /**
-     * @throws InvalidTokenException
+     * Verify a user's email using a verification token
+     *
+     * @param string $token The verification token
+     * @return JsonResponse Response indicating success
+     * @throws InvalidTokenException If the token is invalid or expired
      */
     public function verifyEmail(string $token): JsonResponse {
-        // Find user by token
-        $user = User::where('email_verification_token', '=', $token)->first();
-        if ($user == null) {
-            throw new InvalidTokenException();
-        }
-
-        // Mark email as verified
-        $user->email_verified_at = now();
-        // Clear the verification token
-        $user->email_verification_token = null;
-        $user->email_verification_token_valid_for = null;
-        $user->save();
-
+        EmailVerificationService::verifyEmail($token);
         return $this->boolResponse(true);
     }
 
+    /**
+     * Request a data export for the authenticated user
+     *
+     * @param Request $request The request object
+     * @return JsonResponse Response indicating success
+     */
     public function exportUserData(Request $request): JsonResponse {
-        $user = $request->user();
-        $user = User::where('id', '=', $user->id)->first();
-        $check = UserDataExports::where('user_id', '=', $user->id)->first();
-        if ($check == null) {
-            $userDataExports = new UserDataExports([
-                'user_id' => $user->id,
-                'valid_until' => now()->addDays(),
-                'status' => UserDataExportStatus::QUEUED->value,
-            ]);
-            $userDataExports->save();
-        }
-
-        ExportUserDataJob::dispatch($user);
+        $user = User::where('id', '=', $request->user()->id)->first();
+        UserService::requestDataExport($user);
         return $this->boolResponse(true);
     }
 
 
     /**
-     * @param int $userId
-     * @response array{status: UserDataExportStatus}
-     * @return JsonResponse|StreamedResponse
+     * Download exported data for a user
+     *
+     * @param int $userId The ID of the user
+     * @return JsonResponse|StreamedResponse Response with export status or the exported data
      */
     public function downloadExportedData(int $userId): JsonResponse|StreamedResponse {
-        /** @var UserDataExportStatus $dataStatus */
-        $dataStatus = UserDataExports::where('user_id', '=', $userId)->first()->status;
+        $exportData = UserService::checkDataExportAvailability($userId);
 
-        if ($dataStatus != UserDataExportStatus::COMPLETED->value) {
+        if (!$exportData['available']) {
             return response()->json([
-                /**
-                 * Status of requested user data export operation
-                 * @type UserDataExportStatus
-                 */
-                'status' => $dataStatus,
-            ]);
+                'status' => $exportData['status']
+            ], $exportData['status'] === UserDataExportStatus::NOT_FOUND->value ? 404 : 200);
         }
 
-        Log::info("DownloadExportedData: Downloading data for user ID: {$userId}");
-        if (!Storage::exists("exports/" . $userId . "/data.zip")) {
-            return response()->json([
-                /**
-                 * Returned in case when data to be downloaded was not found
-                 */
-               'status' => UserDataExportStatus::NOT_FOUND->value
-            ], 404);
-        }
-
-        return Storage::download("exports/" . $userId . "/data.zip", "data.zip");
+        return Storage::download($exportData['path'], "data.zip");
     }
 
     /**
-     * @param int $userId
-     * @response array{status: UserDataExportStatus, valid_until: int}
-     * @return JsonResponse
+     * Check the status of a user data export
+     *
+     * @param int $userId The ID of the user
+     * @return JsonResponse Response with export status information
      */
     public function checkExportDataStatus(int $userId): JsonResponse {
-        /** @var UserDataExportStatus $dataStatus */
-        $exports = UserDataExports::where('user_id', '=', $userId)->first();
-        return response()->json([
-            /**
-             * Status of requested user data export operation
-             * @type UserDataExportStatus
-             */
-            'status' => $exports->status,
-            'valid_until' => strtotime($exports->valid_until),
-        ]);
+        $statusData = UserService::getDataExportStatus($userId);
+        return response()->json($statusData);
     }
 }

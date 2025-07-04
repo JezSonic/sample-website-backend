@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserLoginActivityResource;
-use App\Models\UserLoginActivity;
+use App\Utils\Services\UserActivityService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class UserLoginActivityController extends Controller {
     use Response;
 
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * Get login activity for the authenticated user
+     *
+     * @param Request $request The request object
+     * @return JsonResponse Response with login activity data
      */
     public function index(Request $request): JsonResponse {
-        $data = UserLoginActivity::where('user_id', '=', Auth::user()->id)->get();
+        $data = UserActivityService::getLoginActivity();
         return response()->json([
-            'content' => UserLoginActivityResource::collection($data)
+            'content' => $data
         ]);
     }
 }

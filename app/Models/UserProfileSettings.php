@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
+ * @property int $user_id
  * @method static where(string $string, string $operator, mixed $value)
  * @method static updateOrCreate(array $array, array $array1)
  */

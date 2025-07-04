@@ -2,7 +2,7 @@
 
 namespace App\Utils\Services;
 
-use App\Exceptions\User\InvalidRefreshTokenException;
+use App\Exceptions\Auth\OAuth\InvalidRefreshTokenException;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 

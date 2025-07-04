@@ -2,7 +2,7 @@
 
 namespace App\Utils\Services;
 
-use App\Exceptions\User\InvalidTokenException;
+use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -74,7 +74,7 @@ class PasswordResetService {
         }
 
         if (time() > strtotime($user->password_reset_token_valid_for)) {
-            throw new InvalidTokenException('Token has expired');
+            throw new InvalidTokenException('token_has_expired');
         }
 
         $salt = Str::random();

@@ -11,6 +11,7 @@ use App\Models\UserDataExports;
 use App\Models\UserProfileSettings;
 use App\Utils\Enums\OAuthDrivers;
 use App\Utils\Enums\UserDataExportStatus;
+use App\Exceptions\Auth\OAuth\NoRefreshTokenException;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
@@ -73,12 +74,12 @@ class UserService {
      * @param string|null $refreshToken The refresh token to use if needed
      * @param bool $hasRefreshToken Whether the token has a refresh token
      * @return bool True if the token is valid
-     * @throws Exception If the token check fails
+     * @throws NoRefreshTokenException If no refresh token is provided when required
      */
     public static function checkOAuthToken(User $user, string $token, ?string $refreshToken, bool $hasRefreshToken = true): bool {
 
         if (is_null($refreshToken) && $hasRefreshToken) {
-            throw new Exception('No refresh token provided');
+            throw new NoRefreshTokenException();
         }
 
         return true;

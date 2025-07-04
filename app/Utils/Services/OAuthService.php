@@ -59,7 +59,7 @@ class OAuthService {
     public static function checkDriver(OAuthDrivers $driver): bool {
         $array = array_column(OAuthDrivers::cases(), 'value');
         if (!in_array($driver->value, $array)) {
-            throw new UnsupportedDriver('Unsupported OAuth driver. Supported drivers are: ' . join(', ', $array));
+            throw new UnsupportedDriver();
         }
         return true;
     }

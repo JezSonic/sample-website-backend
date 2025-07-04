@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Exceptions\User\AccountNotFoundException;
-use App\Exceptions\User\InvalidTokenException;
 use App\Exceptions\User\PrivateProfileException;
 use App\Http\Requests\NotificationsUpdateRequest;
 use App\Http\Requests\ProfileSettingsUpdateRequest;
@@ -16,7 +16,6 @@ use App\Utils\Traits\Response;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

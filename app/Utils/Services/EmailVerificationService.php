@@ -2,7 +2,7 @@
 
 namespace App\Utils\Services;
 
-use App\Exceptions\User\InvalidTokenException;
+use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Mail\VerifyEmailAddress;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -67,7 +67,7 @@ class EmailVerificationService {
 
         // Check if token is expired
         if (time() > strtotime($user->email_verification_token_valid_for)) {
-            throw new InvalidTokenException('Token has expired');
+            throw new InvalidTokenException('token_has_expired');
         }
 
         // Mark email as verified

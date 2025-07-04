@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\Auth\OAuth\UnsupportedDriver;
+use App\Exceptions\Auth\OAuth\InvalidRefreshTokenException;
+use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
-use App\Exceptions\User\InvalidRefreshTokenException;
-use App\Exceptions\User\InvalidTokenException;
+use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\OAuthCallbackRequest;

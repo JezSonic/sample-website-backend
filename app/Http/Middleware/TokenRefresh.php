@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Exceptions\User\InvalidRefreshTokenException;
+use App\Exceptions\Auth\OAuth\InvalidRefreshTokenException;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

@@ -35,4 +35,37 @@ trait Response {
             'content' => 'invalid_credentials'
         ], 401);
     }
+
+    function paginatedResponse(array $data, int $total, int $perPage, int $page, int $totalPages): JsonResponse {
+        return response()->json([
+            /**
+             * Data returned to the requested page
+             */
+            'data' => $data,
+
+            /**
+             * Total number of entries across all pages
+             * @type int
+             */
+            'total' => $total,
+
+            /**
+             * Number of page the data is from
+             * @type int
+             */
+            'current_page' => $page,
+
+            /**
+             * Number of items per page
+             * @type int
+             */
+            'per_page' => $perPage,
+
+            /**
+             * Number of all pages available
+             * @type int
+             */
+            'total_pages' => $totalPages
+        ]);
+    }
 }

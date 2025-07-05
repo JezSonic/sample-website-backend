@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserActivityRequest;
 use App\Utils\Services\UserActivityService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class UserLoginActivityController extends Controller {
     use Response;
 
     /**
-     * Get login activity for the authenticated user
+     * Get login activity for the authenticated user with pagination
      *
-     * @param Request $request The request object
-     * @return JsonResponse Response with login activity data
+     * @param UserActivityRequest $request The request object
+     * @return JsonResponse Response with paginated login activity data
      */
-    public function index(Request $request): JsonResponse {
-        $data = UserActivityService::getLoginActivity();
-        return response()->json([
-            'content' => $data
-        ]);
+    public function index(UserActivityRequest $request): JsonResponse {
+        $body = $request->all();
+        $data = UserActivityService::getLoginActivity($request->user()->id, $body['page'], $body['per_page']);
+
+        return $this->paginatedResponse($data['data'], $data['total'], $body['per_page'], $body['page'], $data['total_pages']);
     }
 }

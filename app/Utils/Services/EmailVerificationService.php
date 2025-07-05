@@ -67,7 +67,7 @@ class EmailVerificationService {
 
         // Check if token is expired
         if (time() > strtotime($user->email_verification_token_valid_for)) {
-            throw new InvalidTokenException('token_has_expired');
+            throw new InvalidTokenException();
         }
 
         // Mark email as verified

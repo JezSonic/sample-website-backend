@@ -74,7 +74,7 @@ class PasswordResetService {
         }
 
         if (time() > strtotime($user->password_reset_token_valid_for)) {
-            throw new InvalidTokenException('token_has_expired');
+            throw new InvalidTokenException();
         }
 
         $salt = Str::random();

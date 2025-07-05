@@ -20,7 +20,7 @@ Route::post('/verify-email', [UserController::class, 'sendVerificationEmail'])->
 Route::post('/verify-email/{token}', [UserController::class, 'verifyEmail'])->middleware(['auth:sanctum', 'token.refresh']);
 
 // User activity
-Route::get('/activity/login', [UserLoginActivityController::class, 'index'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::post('/activity/login', [UserLoginActivityController::class, 'index'])->middleware(['auth:sanctum', 'token.refresh']);
 
 // User API resource routes (excluding already defined routes)
 Route::apiResource('/', UserController::class, ['except' => ['index', 'update', 'destroy', 'edit']]);

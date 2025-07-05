@@ -15,44 +15,10 @@
         }
     ],
     "paths": {
-        "/api/auth/change-password": {
-            "patch": {
-                "operationId": "auth.changePassword",
-                "tags": [
-                    "Auth"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "content": {
-                                            "type": "boolean",
-                                            "description": "Boolean indicating whether the operation was successful or not",
-                                            "examples": [
-                                                true
-                                            ]
-                                        }
-                                    },
-                                    "required": [
-                                        "content"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
         "/api/auth/reset-password": {
             "post": {
-                "operationId": "auth.forgotPassword",
+                "operationId": "auth.changePassword",
+                "summary": "Change password using a reset token",
                 "tags": [
                     "Auth"
                 ],
@@ -85,6 +51,7 @@
         "/api/auth/reset-password/verify-token": {
             "post": {
                 "operationId": "auth.verifyPasswordResetToken",
+                "summary": "Verify a password reset token",
                 "tags": [
                     "Auth"
                 ],
@@ -107,15 +74,15 @@
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "type": "boolean",
-                                            "description": "Boolean indicating whether the operation was successful or not",
-                                            "examples": [
-                                                true
-                                            ]
+                                            "type": "boolean"
+                                        },
+                                        "creating_password": {
+                                            "type": "boolean"
                                         }
                                     },
                                     "required": [
-                                        "content"
+                                        "content",
+                                        "creating_password"
                                     ]
                                 }
                             }
@@ -130,6 +97,7 @@
         "/api/auth/reset-password/request": {
             "post": {
                 "operationId": "auth.requestChangePassword",
+                "summary": "Request a password reset",
                 "tags": [
                     "Auth"
                 ],
@@ -175,6 +143,7 @@
         "/api/auth/register": {
             "post": {
                 "operationId": "auth.register",
+                "summary": "Register a new user",
                 "tags": [
                     "Auth"
                 ],
@@ -220,6 +189,7 @@
         "/api/auth/login": {
             "post": {
                 "operationId": "auth.login",
+                "summary": "Login a user with email and password",
                 "tags": [
                     "Auth"
                 ],
@@ -239,19 +209,11 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "content": {
-                                            "type": "string"
-                                        },
-                                        "token": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "content",
-                                        "token"
-                                    ]
+                                    "type": [
+                                        "array",
+                                        "null"
+                                    ],
+                                    "items": {}
                                 }
                             }
                         }
@@ -287,9 +249,116 @@
                 }
             }
         },
+        "/api/auth/auth/refresh": {
+            "post": {
+                "operationId": "auth.refreshToken",
+                "summary": "Refresh access token using refresh token",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "refresh_token"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Bearer"
+                                            ]
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "enum": [
+                                                3600
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "access_token",
+                                        "token_type",
+                                        "expires_in"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/api/auth/revoke-refresh": {
+            "post": {
+                "operationId": "auth.revokeRefreshToken",
+                "summary": "Revoke a specific refresh token",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "refresh_token"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/api/auth/logout": {
             "get": {
                 "operationId": "auth.logout",
+                "summary": "Logout the authenticated user",
                 "tags": [
                     "Auth"
                 ],
@@ -313,6 +382,7 @@
         "/api/auth/{driver}/callback": {
             "post": {
                 "operationId": "auth.callback",
+                "summary": "Process OAuth callback",
                 "tags": [
                     "Auth"
                 ],
@@ -321,7 +391,7 @@
                         "name": "driver",
                         "in": "path",
                         "required": true,
-                        "description": "The driver ID",
+                        "description": "The OAuth driver",
                         "schema": {
                             "$ref": "#/components/schemas/OAuthDrivers"
                         }
@@ -345,16 +415,34 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "content": {
+                                        "id": {
                                             "type": "string"
                                         },
-                                        "token": {
+                                        "access_token": {
                                             "type": "string"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Bearer"
+                                            ]
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "enum": [
+                                                3600
+                                            ]
                                         }
                                     },
                                     "required": [
-                                        "content",
-                                        "token"
+                                        "id",
+                                        "access_token",
+                                        "refresh_token",
+                                        "token_type",
+                                        "expires_in"
                                     ]
                                 }
                             }
@@ -375,6 +463,7 @@
         "/api/auth/{driver}": {
             "get": {
                 "operationId": "auth.oauth",
+                "summary": "Get OAuth redirect URL",
                 "tags": [
                     "Auth"
                 ],
@@ -383,7 +472,7 @@
                         "name": "driver",
                         "in": "path",
                         "required": true,
-                        "description": "The driver ID",
+                        "description": "The OAuth driver",
                         "schema": {
                             "$ref": "#/components/schemas/OAuthDrivers"
                         }
@@ -434,6 +523,7 @@
         "/api/auth/{driver}/revoke": {
             "post": {
                 "operationId": "auth.revokeOAuth",
+                "summary": "Revoke OAuth access for the authenticated user",
                 "tags": [
                     "Auth"
                 ],
@@ -442,7 +532,7 @@
                         "name": "driver",
                         "in": "path",
                         "required": true,
-                        "description": "The driver ID",
+                        "description": "The OAuth driver",
                         "schema": {
                             "$ref": "#/components/schemas/OAuthDrivers"
                         }
@@ -512,6 +602,7 @@
         "/api/user": {
             "get": {
                 "operationId": "user.index",
+                "summary": "Get the authenticated user's profile",
                 "tags": [
                     "User"
                 ],
@@ -533,6 +624,7 @@
             },
             "patch": {
                 "operationId": "user.update",
+                "summary": "Update the authenticated user's profile settings",
                 "tags": [
                     "User"
                 ],
@@ -579,6 +671,7 @@
             },
             "delete": {
                 "operationId": "user.destroy",
+                "summary": "Delete the authenticated user's account",
                 "tags": [
                     "User"
                 ],
@@ -614,6 +707,7 @@
         "/api/user/export-data": {
             "get": {
                 "operationId": "user.exportUserData",
+                "summary": "Request a data export for the authenticated user",
                 "tags": [
                     "User"
                 ],
@@ -649,6 +743,7 @@
         "/api/user/{userId}/export-data/download": {
             "get": {
                 "operationId": "user.downloadExportedData",
+                "summary": "Download exported data for a user",
                 "tags": [
                     "User"
                 ],
@@ -657,6 +752,7 @@
                         "name": "userId",
                         "in": "path",
                         "required": true,
+                        "description": "The ID of the user",
                         "schema": {
                             "type": "integer"
                         }
@@ -668,15 +764,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "$ref": "#/components/schemas/UserDataExportStatus"
-                                        }
-                                    },
-                                    "required": [
-                                        "status"
-                                    ]
+                                    "type": "object"
                                 }
                             }
                         }
@@ -687,6 +775,7 @@
         "/api/user/{userId}/export-data/status": {
             "get": {
                 "operationId": "user.checkExportDataStatus",
+                "summary": "Check the status of a user data export",
                 "tags": [
                     "User"
                 ],
@@ -695,6 +784,7 @@
                         "name": "userId",
                         "in": "path",
                         "required": true,
+                        "description": "The ID of the user",
                         "schema": {
                             "type": "integer"
                         }
@@ -706,18 +796,37 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "$ref": "#/components/schemas/UserDataExportStatus"
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "valid_until": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "valid_until"
+                                            ]
                                         },
-                                        "valid_until": {
-                                            "type": "integer"
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "valid_until": {
+                                                    "type": "null"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "valid_until"
+                                            ]
                                         }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "valid_until"
                                     ]
                                 }
                             }
@@ -726,9 +835,55 @@
                 }
             }
         },
+        "/api/user/notifications": {
+            "put": {
+                "operationId": "user.updateNotifications",
+                "tags": [
+                    "User"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotificationsUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/api/user/verify-email": {
             "post": {
                 "operationId": "user.sendVerificationEmail",
+                "summary": "Send a verification email to the authenticated user",
                 "tags": [
                     "User"
                 ],
@@ -764,6 +919,7 @@
         "/api/user/verify-email/{token}": {
             "post": {
                 "operationId": "user.verifyEmail",
+                "summary": "Verify a user's email using a verification token",
                 "tags": [
                     "User"
                 ],
@@ -772,6 +928,7 @@
                         "name": "token",
                         "in": "path",
                         "required": true,
+                        "description": "The verification token",
                         "schema": {
                             "type": "string"
                         }
@@ -806,20 +963,19 @@
                 }
             }
         },
-        "/api/user/{user}": {
+        "/api/user/{}": {
             "get": {
-                "operationId": "user.show",
+                "operationId": "show",
+                "summary": "Get a user's public profile",
                 "tags": [
                     "User"
                 ],
                 "parameters": [
                     {
-                        "name": "user",
                         "in": "path",
                         "required": true,
-                        "description": "The user ID",
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
@@ -833,19 +989,27 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
                     }
                 }
             }
         },
         "/api/user/activity/login": {
-            "get": {
+            "post": {
                 "operationId": "userLoginActivity.index",
+                "summary": "Get login activity for the authenticated user with pagination",
                 "tags": [
                     "UserLoginActivity"
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserActivityRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -854,15 +1018,33 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "content": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/UserLoginActivityResource"
-                                            }
+                                        "data": {
+                                            "type": "string",
+                                            "description": "Data returned to the requested page"
+                                        },
+                                        "total": {
+                                            "type": "string",
+                                            "description": "Total number of entries across all pages"
+                                        },
+                                        "current_page": {
+                                            "type": "string",
+                                            "description": "Number of page the data is from"
+                                        },
+                                        "per_page": {
+                                            "type": "string",
+                                            "description": "Number of items per page"
+                                        },
+                                        "total_pages": {
+                                            "type": "string",
+                                            "description": "Number of all pages available"
                                         }
                                     },
                                     "required": [
-                                        "content"
+                                        "data",
+                                        "total",
+                                        "current_page",
+                                        "per_page",
+                                        "total_pages"
                                     ]
                                 }
                             }
@@ -870,6 +1052,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1066,6 +1251,26 @@
                 ],
                 "title": "LoginRequest"
             },
+            "NotificationsUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "email_marketing": {
+                        "type": "boolean"
+                    },
+                    "email_notifications": {
+                        "type": "boolean"
+                    },
+                    "email_security_alerts": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email_marketing",
+                    "email_notifications",
+                    "email_security_alerts"
+                ],
+                "title": "NotificationsUpdateRequest"
+            },
             "OAuthCallbackRequest": {
                 "type": "object",
                 "properties": {
@@ -1157,57 +1362,21 @@
                 ],
                 "title": "RegisterRequest"
             },
-            "UserDataExportStatus": {
-                "type": "string",
-                "enum": [
-                    "queued",
-                    "processing",
-                    "completed",
-                    "failed",
-                    "not_found"
-                ],
-                "title": "UserDataExportStatus"
-            },
-            "UserLoginActivityResource": {
+            "UserActivityRequest": {
                 "type": "object",
                 "properties": {
-                    "ip_address": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
+                    "page": {
+                        "type": "number"
                     },
-                    "user_agent": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "login_method": {
-                        "type": "string"
-                    },
-                    "location": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "performed_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
+                    "per_page": {
+                        "type": "number"
                     }
                 },
                 "required": [
-                    "ip_address",
-                    "user_agent",
-                    "login_method",
-                    "location",
-                    "performed_at"
+                    "page",
+                    "per_page"
                 ],
-                "title": "UserLoginActivityResource"
+                "title": "UserActivityRequest"
             },
             "UserProfileSettingsResource": {
                 "type": "object",
@@ -1329,25 +1498,6 @@
             }
         },
         "responses": {
-            "AuthenticationException": {
-                "description": "Unauthenticated",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string",
-                                    "description": "Error overview."
-                                }
-                            },
-                            "required": [
-                                "message"
-                            ]
-                        }
-                    }
-                }
-            },
             "ValidationException": {
                 "description": "Validation error",
                 "content": {
@@ -1378,25 +1528,6 @@
                     }
                 }
             },
-            "ModelNotFoundException": {
-                "description": "Not found",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string",
-                                    "description": "Error overview."
-                                }
-                            },
-                            "required": [
-                                "message"
-                            ]
-                        }
-                    }
-                }
-            },
             "OAuthAccountPasswordLoginException": {
                 "description": "OAuth Authentication exception",
                 "content": {
@@ -1416,8 +1547,46 @@
                     }
                 }
             },
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
             "UnsupportedDriver": {
                 "description": "Unsupported OAuth Driver exception",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
                 "content": {
                     "application/json": {
                         "schema": {

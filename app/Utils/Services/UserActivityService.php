@@ -37,19 +37,41 @@ class UserActivityService {
     }
 
     /**
-     * Get login activity for a user
+     * Get login activity for a user with pagination
      *
      * @param int|null $userId The ID of the user (defaults to authenticated user)
-     * @return array Collection of login activity resources
+     * @param int $page The page number (defaults to 1)
+     * @param int $perPage Number of items per page (defaults to 10)
+     * @return array Paginated collection of login activity resources with metadata
      */
-    public static function getLoginActivity(?int $userId = null): array {
+    public static function getLoginActivity(?int $userId = null, int $page = 1, int $perPage = 10): array {
         $userId = $userId ?? Auth::id();
 
         if (!$userId) {
-            return [];
+            return [
+                'data' => [],
+                'total' => 0,
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => 0
+            ];
         }
 
-        $data = UserLoginActivity::where('user_id', '=', $userId)->get();
-        return UserLoginActivityResource::collection($data)->toArray(request());
+        $query = UserLoginActivity::where('user_id', '=', $userId);
+        $total = $query->count();
+        $totalPages = ceil($total / $perPage);
+
+        $data = $query->orderBy('created_at')
+                      ->skip(($page - 1) * $perPage)
+                      ->take($perPage)
+                      ->get();
+
+        return [
+            'data' => UserLoginActivityResource::collection($data)->toArray(request()),
+            'total' => $total,
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => $totalPages
+        ];
     }
 }

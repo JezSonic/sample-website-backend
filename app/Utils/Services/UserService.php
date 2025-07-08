@@ -24,10 +24,13 @@ class UserService {
      * @return UserResource The user resource
      * @throws Exception If token validation fails
      */
-    public static function getUserProfile(User $user): UserResource {
+    public static function getUserProfile(User $user, bool $forEditing = false): UserResource {
+        if (!$user->profileSettings()->first()->is_public && !$forEditing) {
+            throw new PrivateProfileException();
+        }
+
         $user_resource = new UserResource($user);
         $user_data = json_decode(json_encode($user_resource), true);
-
         if (array_key_exists(OAuthDrivers::GITHUB->value, $user_data)) {
             $github = $user->gitHubData()->first();
             $token_check = self::checkOAuthToken($user, $github->github_token, $github->github_refresh_token, false);

@@ -31,7 +31,7 @@ class UserController extends Controller {
      * @throws Exception If token validation fails
      */
     public function index(Request $request): UserResource {
-        return UserService::getUserProfile($request->user());
+        return UserService::getUserProfile($request->user(), true);
     }
 
     /**
@@ -57,13 +57,13 @@ class UserController extends Controller {
     /**
      * Get a user's public profile
      *
-     * @param User $user The user to get the profile for
+     * @param int $userId
      * @return UserResource The user resource
-     * @throws PrivateProfileException If the user's profile is private
      * @throws AccountNotFoundException If the user doesn't exist
+     * @throws PrivateProfileException If the user's profile is private
      */
-    public function show(User $user): UserResource {
-        return UserService::getPublicProfile($user);
+    public function show(int $userId): UserResource {
+        return UserService::getPublicProfile(User::find($userId));
     }
 
     /**

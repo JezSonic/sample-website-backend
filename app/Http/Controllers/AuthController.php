@@ -59,7 +59,7 @@ class AuthController extends Controller {
             'oauth_' . $driver->value
         );
 
-        return response()->json($loginData);
+        return $this->authResponse($loginData['id'], $loginData['access_token'], $loginData['refresh_token']);
     }
 
     /**
@@ -77,7 +77,7 @@ class AuthController extends Controller {
             return $this->invalidCredentialsResponse();
         }
 
-        return response()->json($loginResult);
+        return $this->authResponse($loginResult['id'], $loginResult['access_token'], $loginResult['refresh_token']);
     }
 
     /**

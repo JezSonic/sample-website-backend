@@ -209,11 +209,42 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": [
-                                        "array",
-                                        "null"
-                                    ],
-                                    "items": {}
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "description": "ID of the user the tokens are assigned to"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "description": "Access token"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "description": "Refresh token"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "description": "Token type",
+                                            "enum": [
+                                                "Bearer"
+                                            ]
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "description": "Time in seconds for how long the access token is valid for",
+                                            "enum": [
+                                                3600
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "access_token",
+                                        "refresh_token",
+                                        "token_type",
+                                        "expires_in"
+                                    ]
                                 }
                             }
                         }
@@ -416,22 +447,27 @@
                                     "type": "object",
                                     "properties": {
                                         "id": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "description": "ID of the user the tokens are assigned to"
                                         },
                                         "access_token": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "description": "Access token"
                                         },
                                         "refresh_token": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "description": "Refresh token"
                                         },
                                         "token_type": {
                                             "type": "string",
+                                            "description": "Token type",
                                             "enum": [
                                                 "Bearer"
                                             ]
                                         },
                                         "expires_in": {
                                             "type": "integer",
+                                            "description": "Time in seconds for how long the access token is valid for",
                                             "enum": [
                                                 3600
                                             ]
@@ -704,6 +740,37 @@
                 }
             }
         },
+        "/api/user/{userId}": {
+            "get": {
+                "operationId": "show",
+                "summary": "Get a user's public profile",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/user/export-data": {
             "get": {
                 "operationId": "user.exportUserData",
@@ -959,36 +1026,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
-        "/api/user/{}": {
-            "get": {
-                "operationId": "show",
-                "summary": "Get a user's public profile",
-                "tags": [
-                    "User"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "`UserResource`",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UserResource"
-                                }
-                            }
-                        }
                     }
                 }
             }

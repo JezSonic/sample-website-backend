@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // User profile routes
 Route::get('/', [UserController::class, 'index'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::get('/{userId}', [UserController::class, 'show']);
 Route::patch('/', [UserController::class, 'update'])->middleware(['auth:sanctum', 'token.refresh']);
 Route::delete('/', [UserController::class, 'destroy'])->middleware(['auth:sanctum', 'token.refresh']);
 

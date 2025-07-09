@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Dedoc\Scramble\Scramble;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use SocialiteProviders\GoogleOneTap\Provider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -22,6 +25,9 @@ class AppServiceProvider extends ServiceProvider {
      * Bootstrap any application services.
      */
     public function boot(): void {
+        Event::listen(function (SocialiteWasCalled $event) {
+            $event->extendSocialite('google-one-tap', Provider::class);
+        });
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         JsonResource::withoutWrapping();
         Scramble::routes(function (Route $route) {

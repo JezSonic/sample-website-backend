@@ -75,7 +75,12 @@ class OAuthService {
     public static function processOAuthCallback(OAuthDrivers $driver, Request $request): array {
         self::checkDriver($driver);
 
-        $userData = Socialite::driver($driver->value)->stateless()->user();
+        if ($driver == OAuthDrivers::GOOGLE_ONE_TAP) {
+            $userData = Socialite::driver('google-one-tap')->userFromToken($request->get('token'));
+        } else {
+            $userData = Socialite::driver($driver->value)->stateless()->user();
+        }
+
         $data = [
             'name' => $userData->name,
             'email' => $userData->email
@@ -150,6 +155,24 @@ class OAuthService {
                 'google_email' => $userData->email,
                 'google_avatar_url' => $userData->avatar,
                 'google_token_expires_in' => self::calculateTokenExpiration($userData->expiresIn),
+            ]);
+
+            $email_verified = $userData->user['email_verified'] || $userData->user['verified_email'];
+            if ($data['email'] == $userData->user['email'] && $email_verified) {
+                $data['email_verified_at'] = now();
+            }
+        } else if ($driver == OAuthDrivers::GOOGLE_ONE_TAP) {
+            GoogleUserData::updateOrCreate(
+                [
+                    'user_id' => $user_id
+                ], [
+                'id' => $userData->id,
+                'google_token' => null,
+                'google_refresh_token' => null,
+                'google_name' => $userData->name,
+                'google_email' => $userData->email,
+                'google_avatar_url' => $userData->avatar,
+                'google_token_expires_in' => null,
             ]);
 
             $email_verified = $userData->user['email_verified'] || $userData->user['verified_email'];

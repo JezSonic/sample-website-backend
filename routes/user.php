@@ -14,7 +14,7 @@ Route::delete('/', [UserController::class, 'destroy'])->middleware(['auth:sanctu
 Route::get('/export-data', [UserController::class, 'exportUserData'])->middleware(['auth:sanctum', 'token.refresh']);
 Route::get('/{userId}/export-data/download', [UserController::class, 'downloadExportedData']);
 Route::get('/{userId}/export-data/status', [UserController::class, 'checkExportDataStatus']);
-Route::put('/notifications', [UserController::class, 'updateNotifications']);
+Route::put('/notifications', [UserController::class, 'updateNotifications'])->middleware(['auth:sanctum', 'token.refresh']);
 
 // Email verification routes
 Route::post('/verify-email', [UserController::class, 'sendVerificationEmail'])->middleware(['auth:sanctum', 'token.refresh']);

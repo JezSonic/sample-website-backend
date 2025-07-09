@@ -61,7 +61,7 @@ class UserActivityService {
         $total = $query->count();
         $totalPages = ceil($total / $perPage);
 
-        $data = $query->orderBy('created_at')
+        $data = $query->orderBy('created_at', 'desc')
                       ->skip(($page - 1) * $perPage)
                       ->take($perPage)
                       ->get();

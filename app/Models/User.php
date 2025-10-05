@@ -3,13 +3,19 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use DateTimeInterface;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
+use Laragear\TwoFactor\Contracts\TwoFactorTotp;
+use Laragear\TwoFactor\TwoFactorAuthentication;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -26,9 +32,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static updateOrCreate(array $array, array $array1)
  * @method static find(int $id)
  */
-class User extends Authenticatable implements MustVerifyEmail {
+class User extends Authenticatable implements MustVerifyEmail, TwoFactorAuthenticatable {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, TwoFactorAuthentication;
 
     /**
      * The attributes that are mass assignable.

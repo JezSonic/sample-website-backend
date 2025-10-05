@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use App\Http\Middleware\TokenRefresh;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->appendToGroup('api', HandleCors::class);
         $middleware->appendToGroup('api', StartSession::class);
         $middleware->appendToGroup('api', ShareErrorsFromSession::class);
         $middleware->removeFromGroup('api', RedirectIfAuthenticated::class);

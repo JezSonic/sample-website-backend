@@ -6,6 +6,7 @@ use App\Exceptions\Auth\OAuth\InvalidRefreshTokenException;
 use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
+use App\Exceptions\Auth\TwoFactor\TwoFactorAlreadyEnabledException;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\OAuthCallbackRequest;
@@ -21,6 +22,7 @@ use App\Utils\Services\TokenService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Random\RandomException;
 
 class AuthController extends Controller {
@@ -198,5 +200,50 @@ class AuthController extends Controller {
         $token = $request->input('token');
         $result = PasswordResetService::verifyToken($token);
         return response()->json($result);
+    }
+
+    /**
+     * @throws TwoFactorAlreadyEnabledException
+     */
+    public function prepareTwoFactor(Request $request): JsonResponse {
+        $user = $request->user();
+        if ($user == null) {
+            return $this->invalidCredentialsResponse();
+        }
+        if ($user->hasTwoFactorEnabled()) {
+            throw new TwoFactorAlreadyEnabledException();
+        }
+        $secret = $user->createTwoFactorAuth();
+        return response()->json([
+            /**
+             * QR Code for two-factor authentication
+             */
+            'qr_code' => $secret->toQr(),
+
+            /**
+             * URI for two-factor authentication
+             */
+            'uri' => $secret->toUri()
+        ]);
+    }
+
+    /**
+     * @throws TwoFactorAlreadyEnabledException
+     */
+    public function confirmTwoFactor(Request $request): JsonResponse {
+        $data = $request->validate([
+            'code' => 'required|numeric'
+        ]);
+
+        $user = $request->user();
+        if ($user == null) {
+            return $this->invalidCredentialsResponse();
+        }
+        if ($user->hasTwoFactorEnabled()) {
+            throw new TwoFactorAlreadyEnabledException();
+        }
+        Log::info("Confirming two-factor auth for user: " . $user->id . ", code: " . $data['code']);
+        $activated = $user->confirmTwoFactorAuth($data['code']);
+        return $this->boolResponse($activated);
     }
 }

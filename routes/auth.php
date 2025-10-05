@@ -19,3 +19,10 @@ Route::get('/logout', [AuthController::class, 'logout'])->middleware(['auth:sanc
 Route::post('/{driver}/callback', [AuthController::class, 'callback']);
 Route::get('/{driver}', [AuthController::class, 'oauth']);
 Route::post('/{driver}/revoke', [AuthController::class, 'revokeOAuth'])->middleware(['auth:sanctum', 'token.refresh']);
+
+
+// 2FA routes
+Route::post('/2fa/enable', [AuthController::class, 'enableTwoFactorAuthentication']);
+Route::post('/2fa/disable', [AuthController::class, 'disableTwoFactorAuthentication']);
+Route::get('/2fa/prepare', [AuthController::class, 'prepareTwoFactor']);
+Route::post('/2fa/confirm', [AuthController::class, 'confirmTwoFactor']);

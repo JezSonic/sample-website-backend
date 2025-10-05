@@ -5,7 +5,7 @@ services:
     build:
       context: ./
     container_name: backend-dev
-    restart: always
+    restart: no
     depends_on:
       - mysql
       - redis
@@ -20,7 +20,7 @@ services:
   mysql:
     image: 'mysql:8.4.5'
     container_name: mysql-dev
-    restart: always
+    restart: no
     networks:
       - db
     ports:
@@ -37,7 +37,7 @@ services:
   redis:
     image: 'redis:8.0'
     container_name: redis-dev
-    restart: always
+    restart: no
     command: ["redis-server", "/etc/redis/redis.conf"]
     networks:
       - db

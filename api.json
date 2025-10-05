@@ -606,6 +606,93 @@
                 }
             }
         },
+        "/api/auth/2fa/prepare": {
+            "post": {
+                "operationId": "auth.prepareTwoFactor",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "qr_code": {
+                                            "type": "string",
+                                            "description": "QR Code for two-factor authentication"
+                                        },
+                                        "uri": {
+                                            "type": "string",
+                                            "description": "URI for two-factor authentication"
+                                        }
+                                    },
+                                    "required": [
+                                        "qr_code",
+                                        "uri"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/2fa/confirm": {
+            "post": {
+                "operationId": "auth.confirmTwoFactor",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": [
+                                    "code"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "string",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/sanctum/csrf-cookie": {
             "get": {
                 "operationId": "sanctum.csrf-cookie",
@@ -940,6 +1027,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
@@ -1324,6 +1414,7 @@
                 "type": "string",
                 "enum": [
                     "google",
+                    "google-one-tap",
                     "github"
                 ],
                 "title": "OAuthDrivers"

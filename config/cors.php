@@ -15,20 +15,31 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // Apply CORS to API and Sanctum endpoints (and any other relevant public paths)
+    'paths' => ['api/*', 'sanctum/*', 'assets/*', 'auth/*'],
 
+    // Allow all HTTP methods by default
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Use explicit origins to ensure ACAO is set on preflight when credentials are used.
+    // FRONTEND_URL is preferred; falls back to APP_URL; finally '*' for development.
+    'allowed_origins' => array_filter([
+        env('FRONTEND_URL'),
+        env('APP_URL'),
+    ]) ?: ['*'],
 
     'allowed_origins_patterns' => [],
 
+    // Allow any headers from the client
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    // Cache preflight response for 1 hour
+    'max_age' => 3600,
 
+    // Keep credentials support enabled (cookies/authorization headers).
+    // NOTE: When using credentials, do not leave allowed_origins as only ['*'] in production.
     'supports_credentials' => true,
 
 ];

@@ -1011,37 +1011,23 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "valid_until": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "status",
-                                                "valid_until"
-                                            ]
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "description": "Status of the data export request\n| |\n|---|\n| `queued` <br/> Data export is queued for processing |\n| `processing` <br/> Data export is currently being processed |\n| `completed` <br/> Data export has been completed successfully |\n| `failed` <br/> Data export has failed |\n| `not_found` <br/> Data export is not found |",
+                                            "$ref": "#/components/schemas/UserDataExportStatus"
                                         },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "status": {
-                                                    "type": "string"
-                                                },
-                                                "valid_until": {
-                                                    "type": "null"
-                                                }
-                                            },
-                                            "required": [
-                                                "status",
-                                                "valid_until"
-                                            ]
+                                        "valid_until": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "description": "The date until the exported data is available, null if not available"
                                         }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "valid_until"
                                     ]
                                 }
                             }
@@ -1053,6 +1039,7 @@
         "/api/user/notifications": {
             "put": {
                 "operationId": "user.updateNotifications",
+                "summary": "Update the authenticated user's notification settings",
                 "tags": [
                     "User"
                 ],
@@ -1479,6 +1466,7 @@
             },
             "OAuthDrivers": {
                 "type": "string",
+                "description": "Enumeration representing supported OAuth driver types.\n| |\n|---|\n| `google` <br/> Google OAuth driver |\n| `google-one-tap` <br/> Google One Tap OAuth driver |\n| `github` <br/> GitHub OAuth driver |",
                 "enum": [
                     "google",
                     "google-one-tap",
@@ -1572,6 +1560,18 @@
                     "per_page"
                 ],
                 "title": "UserActivityRequest"
+            },
+            "UserDataExportStatus": {
+                "type": "string",
+                "description": "Enum representing the status of a user data export\n| |\n|---|\n| `queued` <br/> Data export is queued for processing |\n| `processing` <br/> Data export is currently being processed |\n| `completed` <br/> Data export has been completed successfully |\n| `failed` <br/> Data export has failed |\n| `not_found` <br/> Data export is not found |",
+                "enum": [
+                    "queued",
+                    "processing",
+                    "completed",
+                    "failed",
+                    "not_found"
+                ],
+                "title": "UserDataExportStatus"
             },
             "UserProfileSettingsResource": {
                 "type": "object",

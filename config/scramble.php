@@ -15,9 +15,7 @@ use Dedoc\Scramble\Support\OperationExtensions\RequestEssentialsExtension;
 use Dedoc\Scramble\Support\OperationExtensions\ResponseExtension;
 use Dedoc\Scramble\Support\Type\VoidType;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\CollectionToSchema;
-use Dedoc\Scramble\Support\TypeToSchemaExtensions\EnumToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\JsonResourceTypeToSchema;
-use Dedoc\Scramble\Support\TypeToSchemaExtensions\MergesOpenApiObjects;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\ModelToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\ResourceResponseTypeToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\ResponseTypeToSchema;
@@ -134,11 +132,9 @@ return [
         UnsupportedDriverExceptionExtension::class,
         CollectionToSchema::class,
         DeprecationExtension::class,
-        EnumToSchema::class,
         JsonResourceExtension::class,
         JsonResponseMethodReturnTypeExtension::class,
         JsonResourceTypeToSchema::class,
-        MergesOpenApiObjects::class,
         ModelExtension::class,
         ModelToSchema::class,
         ResourceResponseTypeToSchema::class,

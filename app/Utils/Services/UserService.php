@@ -153,13 +153,31 @@ class UserService {
 
         if (!$exports) {
             return [
+                /**
+                 * Status of the data export request
+                 * @var UserDataExportStatus
+                 */
                 'status' => UserDataExportStatus::NOT_FOUND->value,
+
+                /**
+                 * The date until the exported data is available, null if not available
+                 * @var string|null
+                 */
                 'valid_until' => null,
             ];
         }
 
         return [
+            /**
+             * Status of the data export request
+             * @var UserDataExportStatus
+             */
             'status' => $exports->status,
+
+            /**
+             * The date until the exported data is available, null if not available
+             * @var string|null
+             */
             'valid_until' => strtotime($exports->valid_until),
         ];
     }

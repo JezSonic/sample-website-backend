@@ -47,6 +47,12 @@ class UserController extends Controller {
         return $this->boolResponse(true);
     }
 
+    /**
+     * Update the authenticated user's notification settings
+     *
+     * @param NotificationsUpdateRequest $request The notification update request
+     * @return JsonResponse Response indicating success
+     */
     public function updateNotifications(NotificationsUpdateRequest $request): JsonResponse {
         $data = $request->all();
         $user = User::find($request->user()->id);

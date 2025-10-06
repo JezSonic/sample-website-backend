@@ -7,6 +7,7 @@ use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use App\Exceptions\Auth\TwoFactor\TwoFactorAlreadyEnabledException;
+use App\Exceptions\Auth\TwoFactor\TwoFactorRequiredException;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\OAuthCallbackRequest;
@@ -22,7 +23,6 @@ use App\Utils\Services\TokenService;
 use App\Utils\Traits\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Random\RandomException;
 
 class AuthController extends Controller {
@@ -69,12 +69,11 @@ class AuthController extends Controller {
      *
      * @param LoginRequest $request The login request
      * @return JsonResponse Response with tokens or error
-     * @throws OAuthAccountPasswordLoginException If the account was created using OAuth
+     * @throws OAuthAccountPasswordLoginException|TwoFactorRequiredException If the account was created using OAuth
      */
     function login(LoginRequest $request): JsonResponse {
         $data = $request->all();
         $loginResult = AuthService::login($data['email'], $data['password'], $request);
-
         if ($loginResult === null) {
             return $this->invalidCredentialsResponse();
         }
@@ -203,6 +202,7 @@ class AuthController extends Controller {
     }
 
     /**
+     * Prepare 2FA Authentication (for the setup first only)
      * @throws TwoFactorAlreadyEnabledException
      */
     public function prepareTwoFactor(Request $request): JsonResponse {
@@ -228,22 +228,66 @@ class AuthController extends Controller {
     }
 
     /**
+     * Confirm and enable 2FA Authentication (after setup first only)
      * @throws TwoFactorAlreadyEnabledException
      */
     public function confirmTwoFactor(Request $request): JsonResponse {
+        $user = User::find($request->user()->id);
         $data = $request->validate([
-            'code' => 'required|numeric'
+            'code' => 'required'
         ]);
 
-        $user = $request->user();
         if ($user == null) {
             return $this->invalidCredentialsResponse();
         }
+
         if ($user->hasTwoFactorEnabled()) {
             throw new TwoFactorAlreadyEnabledException();
         }
-        Log::info("Confirming two-factor auth for user: " . $user->id . ", code: " . $data['code']);
-        $activated = $user->confirmTwoFactorAuth($data['code']);
-        return $this->boolResponse($activated);
+
+        // Normalize the code: keep digits only, preserve/pad leading zeros to 6 digits
+        $rawCode = (string) ($data['code'] ?? '');
+        $normalized = preg_replace('/\D+/', '', $rawCode) ?? '';
+        if (strlen($normalized) < 6) {
+            $normalized = str_pad($normalized, 6, '0', STR_PAD_LEFT);
+        }
+
+        // If after normalization it's not exactly 6 digits, reject
+        if (!preg_match('/^\d{6}$/', $normalized)) {
+            return $this->invalidCredentialsResponse();
+        }
+
+        // Log actual TOTP settings to debug potential mismatch
+        $tfa = $user->twoFactorAuth;$activated = $user->confirmTwoFactorAuth($normalized);
+        if ($activated) {
+            return response()->json(['recovery_codes' => $user->getRecoveryCodes()]);
+        } else {
+            return $this->invalidCredentialsResponse();
+        }
+    }
+
+    /**
+     * Retrieve recovery codes for the authenticated user
+     *
+     * @param Request $request The request object containing user information
+     * @return JsonResponse Response with the user's recovery codes
+     */
+    public function getRecoveryCodes(Request $request): JsonResponse {
+        $user = User::find($request->user()->id);
+        if ($user == null) {
+            return $this->invalidCredentialsResponse();
+        }
+        return response()->json(['recovery_codes' => $user->getRecoveryCodes()]);
+    }
+
+    /**
+     * Disable two-factor authentication for the authenticated user
+     *
+     * @param Request $request The request instance
+     * @return JsonResponse Response indicating the operation status
+     */
+    public function disableTwoFactorAuth(Request $request): JsonResponse {
+        $request->user()->disableTwoFactorAuth();
+        return $this->boolResponse(true);
     }
 }

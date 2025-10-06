@@ -3,12 +3,14 @@
 namespace App\Utils\Services;
 
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
+use App\Exceptions\Auth\TwoFactor\TwoFactorRequiredException;
 use App\Models\User;
 use App\Models\UserProfileSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Laragear\TwoFactor\Facades\Auth2FA;
 
 class AuthService {
     /**
@@ -44,24 +46,32 @@ class AuthService {
      * @param Request $request The request object
      * @return array|null The user and tokens if login was successful, null otherwise
      * @throws OAuthAccountPasswordLoginException If the account was created using OAuth
+     * @throws TwoFactorRequiredException
      */
     public static function login(string $email, string $password, Request $request): ?array {
         Auth::guard()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        $data = $request->all();
         $user = User::where('email', '=', $email)->first();
 
         if ($user == null) {
             return null;
         }
 
+        if ($user->hasTwoFactorEnabled() && $data['two_factor_code'] == null) {
+            throw new TwoFactorRequiredException();
+        } else if ($user->hasTwoFactorEnabled() && $data['two_factor_code'] != null) {
+            if (!$user->validateTwofactorCode($data['two_factor_code'])) {
+                return null;
+            }
+        }
+
         $_salt = $user->getSalt();
-        // Check if account was created using OAuth (no salt means OAuth account)
+        // Check if an account was created using OAuth (no salt means OAuth account)
         if ($_salt === null) {
             throw new OAuthAccountPasswordLoginException();
         }
-
         $attempt = Auth::attempt(['email' => $email, 'password' => $password . $_salt]);
 
         if (!$attempt) {

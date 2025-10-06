@@ -10,15 +10,15 @@
         "ext-mbstring": "*",
         "ext-pdo": "*",
         "ext-zip": "*",
-        "dedoc/scramble": "0.12.23",
-        "laragear/two-factor": "^3.0",
-        "laravel/framework": "12.20.0",
-        "laravel/sanctum": "4.1.2",
-        "laravel/socialite": "5.21.0",
+        "dedoc/scramble": "0.12.35",
+        "laragear/two-factor": "3.0.0",
+        "laravel/framework": "12.32.5",
+        "laravel/sanctum": "4.2.0",
+        "laravel/socialite": "5.23.0",
         "laravel/tinker": "2.10.1",
         "nickbeen/socialiteproviders-google-one-tap": "1.0.1",
-        "predis/predis": "3.0.1",
-        "stevebauman/location": "7.5.0"
+        "predis/predis": "3.2.0",
+        "stevebauman/location": "7.6.0"
     },
     "require-dev": {
         "fakerphp/faker": "1.24.1",

@@ -22,7 +22,7 @@ Route::post('/{driver}/revoke', [AuthController::class, 'revokeOAuth'])->middlew
 
 
 // 2FA routes
-Route::post('/2fa/enable', [AuthController::class, 'enableTwoFactorAuthentication']);
-Route::post('/2fa/disable', [AuthController::class, 'disableTwoFactorAuthentication']);
-Route::get('/2fa/prepare', [AuthController::class, 'prepareTwoFactor']);
-Route::post('/2fa/confirm', [AuthController::class, 'confirmTwoFactor']);
+Route::get('/2fa/prepare', [AuthController::class, 'prepareTwoFactor'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::post('/2fa/confirm', [AuthController::class, 'confirmTwoFactor'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::post('/2fa/disable', [AuthController::class, 'disableTwoFactorAuth'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::get('/2fa/recovery-codes', [AuthController::class, 'getRecoveryCodes'])->middleware(['auth:sanctum', 'token.refresh']);

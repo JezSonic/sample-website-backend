@@ -123,8 +123,8 @@ return [
 
     'totp' => [
         'digits' => 6,
-        'seconds' => 60,
-        'window' => 1,
+        'seconds' => 30,
+        'window' => 2,
         'algorithm' => 'sha1',
     ],
 

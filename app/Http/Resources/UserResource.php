@@ -28,7 +28,8 @@ class UserResource extends JsonResource {
             'google' => new GoogleUserDataResource($this->whenNotNull($google_data)),
             'github' => new GitHubUserDataResource($this->whenNotNull($github_data)),
             'profile_settings' => new UserProfileSettingsResource($this->whenNotNull($settings_data)),
-            'has_password' => !($this->getSalt() == null)
+            'has_password' => !($this->getSalt() == null),
+            'has_two_factor_enabled' => $this->hasTwoFactorEnabled(),
         ];
     }
 }

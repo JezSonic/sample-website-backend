@@ -2,16 +2,12 @@
     "openapi": "3.1.0",
     "info": {
         "title": "New DEV",
-        "version": "1.5.0"
+        "version": "0.0.1"
     },
     "servers": [
         {
             "url": "http://localhost:81",
             "description": "local"
-        },
-        {
-            "url": "https://server.newdev.pl",
-            "description": "production"
         }
     ],
     "paths": {
@@ -607,8 +603,9 @@
             }
         },
         "/api/auth/2fa/prepare": {
-            "post": {
+            "get": {
                 "operationId": "auth.prepareTwoFactor",
+                "summary": "Prepare 2FA Authentication (for the setup first only)",
                 "tags": [
                     "Auth"
                 ],
@@ -636,6 +633,9 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -643,6 +643,7 @@
         "/api/auth/2fa/confirm": {
             "post": {
                 "operationId": "auth.confirmTwoFactor",
+                "summary": "Confirm and enable 2FA Authentication (after setup first only)",
                 "tags": [
                     "Auth"
                 ],
@@ -654,7 +655,7 @@
                                 "type": "object",
                                 "properties": {
                                     "code": {
-                                        "type": "number"
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -665,6 +666,41 @@
                     }
                 },
                 "responses": {
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "recovery_codes": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "recovery_codes"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/api/auth/2fa/disable": {
+            "post": {
+                "operationId": "auth.disableTwoFactorAuth",
+                "summary": "Disable two-factor authentication for the authenticated user",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
                     "200": {
                         "description": "",
                         "content": {
@@ -673,7 +709,7 @@
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "type": "string",
+                                            "type": "boolean",
                                             "description": "Boolean indicating whether the operation was successful or not",
                                             "examples": [
                                                 true
@@ -687,8 +723,40 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/api/auth/2fa/recovery-codes": {
+            "get": {
+                "operationId": "auth.getRecoveryCodes",
+                "summary": "Retrieve recovery codes for the authenticated user",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "recovery_codes": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "recovery_codes"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -702,19 +770,12 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No content",
+                        "description": "No content\n\nNo content",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "string"
-                                        },
-                                        {
-                                            "type": "array",
-                                            "items": {}
-                                        }
-                                    ]
+                                    "type": "array",
+                                    "items": {}
                                 }
                             }
                         }
@@ -1369,6 +1430,12 @@
                     },
                     "ip_address": {
                         "type": "string"
+                    },
+                    "two_factor_code": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 },
                 "required": [
@@ -1598,6 +1665,9 @@
                     },
                     "has_password": {
                         "type": "boolean"
+                    },
+                    "has_two_factor_enabled": {
+                        "type": "boolean"
                     }
                 },
                 "required": [
@@ -1607,7 +1677,8 @@
                     "email_verified_at",
                     "created_at",
                     "updated_at",
-                    "has_password"
+                    "has_password",
+                    "has_two_factor_enabled"
                 ],
                 "title": "UserResource"
             },

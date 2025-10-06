@@ -2,7 +2,6 @@
 
 use App\Scramble\Extensions\OAuth\UnsupportedDriverExceptionExtension;
 use App\Scramble\Extensions\OAuthExceptionExtension;
-use Dedoc\Scramble\Http\Middleware\RestrictedDocsAccess;
 use Dedoc\Scramble\Support\InferExtensions\JsonResourceExtension;
 use Dedoc\Scramble\Support\InferExtensions\JsonResponseMethodReturnTypeExtension;
 use Dedoc\Scramble\Support\InferExtensions\ModelExtension;
@@ -15,7 +14,6 @@ use Dedoc\Scramble\Support\OperationExtensions\RequestBodyExtension;
 use Dedoc\Scramble\Support\OperationExtensions\RequestEssentialsExtension;
 use Dedoc\Scramble\Support\OperationExtensions\ResponseExtension;
 use Dedoc\Scramble\Support\Type\VoidType;
-use Dedoc\Scramble\Support\TypeToSchemaExtensions\AnonymousResourceCollectionTypeToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\CollectionToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\EnumToSchema;
 use Dedoc\Scramble\Support\TypeToSchemaExtensions\JsonResourceTypeToSchema;
@@ -47,7 +45,7 @@ return [
         /*
          * API version.
          */
-        'version' => env('API_VERSION', '1.5.0'),
+        'version' => env('API_VERSION', '0.0.1'),
 
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
@@ -65,14 +63,19 @@ return [
         'title' => null,
 
         /*
-         * Define the theme of the documentation. Available options are `light` and `dark`.
+         * Define the theme of the documentation. Available options are `light`, `dark`, and `system`.
          */
-        'theme' => 'light',
+        'theme' => 'system',
 
         /*
          * Hide the `Try It` feature. Enabled by default.
          */
         'hide_try_it' => false,
+
+        /*
+         * Hide the schemas in the Table of Contents. Enabled by default.
+         */
+        'hide_schemas' => false,
 
         /*
          * URL to an image that displays as a small square logo next to the title, above the table of contents.
@@ -83,6 +86,14 @@ return [
          * Use to fetch the credential policy for the Try It feature. Options are: omit, include (default), and same-origin
          */
         'try_it_credentials_policy' => 'include',
+
+        /*
+         * There are three layouts for Elements:
+         * - sidebar - (Elements default) Three-column design with a sidebar that can be resized.
+         * - responsive - Like sidebar, except at small screen sizes it collapses the sidebar into a drawer that can be toggled open.
+         * - stacked - Everything in a single column, making integrations with existing websites that have their own sidebar or other columns already.
+         */
+        'layout' => 'responsive',
     ],
 
     /*
@@ -101,17 +112,26 @@ return [
      */
     'servers' => [
         'local' => 'http://localhost:81',
-        'production' => 'https://server.newdev.pl',
     ],
 
     'middleware' => [
         'web',
     ],
 
+    /**
+     * Determines how Scramble stores the descriptions of enum cases.
+     * Available options:
+     * - 'description' – Case descriptions are stored as the enum schema's description using table formatting.
+     * - 'extension' – Case descriptions are stored in the `x-enumDescriptions` enum schema extension.
+     *
+     *    @see https://redocly.com/docs-legacy/api-reference-docs/specification-extensions/x-enum-descriptions
+     * - false - Case descriptions are ignored.
+     */
+    'enum_cases_description_strategy' => 'description',
+
     'extensions' => [
         OAuthExceptionExtension::class,
         UnsupportedDriverExceptionExtension::class,
-        AnonymousResourceCollectionTypeToSchema::class,
         CollectionToSchema::class,
         DeprecationExtension::class,
         EnumToSchema::class,

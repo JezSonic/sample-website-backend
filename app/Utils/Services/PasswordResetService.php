@@ -102,15 +102,24 @@ class PasswordResetService {
             throw new InvalidTokenException();
         }
 
+        $is_creating_password = ($user->getSalt() == null);
+        $success = false;
+
         if (time() > strtotime($user->password_reset_token_valid_for)) {
-            $is_creating_password = ($user->getSalt() == null);
             $user->password_reset_token = null;
             $user->password_reset_token_valid_for = null;
             $user->save();
-            return ['content' => false, 'creating_password' => $is_creating_password];
+        } else {
+            $success = true;
         }
 
-        $is_creating_password = ($user->getSalt() == null);
-        return ['content' => true, 'creating_password' => $is_creating_password];
+
+        return [
+            /** Determines success of the verification */
+            'content' => $success,
+
+            /** Whether the token is for creating a new password */
+            'creating_password' => $is_creating_password
+        ];
     }
 }

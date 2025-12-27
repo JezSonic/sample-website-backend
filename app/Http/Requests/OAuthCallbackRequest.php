@@ -20,6 +20,9 @@ class OAuthCallbackRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /**
+             * IP address of the user logging in to the application.
+             */
             'ip_address' => 'required|string|ip'
         ];
     }

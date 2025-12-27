@@ -20,6 +20,6 @@ class UserLoginActivityController extends Controller {
         $body = $request->all();
         $data = UserActivityService::getLoginActivity($request->user()->id, $body['page'], $body['per_page']);
 
-        return $this->paginatedResponse($data['data'], $data['total'], $body['per_page'], $body['page'], $data['total_pages']);
+        return $this->paginatedResponse($data['data'], $data['total'], $body['page'], $body['per_page'], $data['total_pages']);
     }
 }

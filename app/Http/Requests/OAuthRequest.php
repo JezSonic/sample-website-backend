@@ -20,6 +20,7 @@ class OAuthRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /** Integration ID of the OAuth provider */
             'integration_id' => 'nullable|string',
         ];
     }

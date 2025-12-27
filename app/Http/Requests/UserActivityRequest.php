@@ -20,7 +20,14 @@ class UserActivityRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /**
+             * Page to begin the pagination from.
+             */
             'page' => 'required|numeric|gt:0',
+
+            /**
+             * Number of items to return per page.
+             */
             'per_page' => 'required|numeric|gt:0',
         ];
     }

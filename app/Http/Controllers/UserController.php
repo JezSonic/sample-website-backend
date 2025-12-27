@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Auth\OAuth\InvalidTokenException;
 use App\Exceptions\User\AccountNotFoundException;
+use App\Exceptions\User\InvalidAvatarSourceException;
 use App\Exceptions\User\PrivateProfileException;
 use App\Http\Requests\NotificationsUpdateRequest;
 use App\Http\Requests\ProfileSettingsUpdateRequest;
@@ -39,6 +40,7 @@ class UserController extends Controller {
      *
      * @param ProfileSettingsUpdateRequest $request The profile update request
      * @return JsonResponse Response indicating success
+     * @throws InvalidAvatarSourceException
      */
     public function update(ProfileSettingsUpdateRequest $request): JsonResponse {
         $data = $request->all();

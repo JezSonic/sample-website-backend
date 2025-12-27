@@ -66,8 +66,11 @@ class TokenService {
         $tokenModel->forceFill(['last_used_at' => now()])->save();
 
         return [
+            /** Access token for the user */
             'access_token' => $accessToken->plainTextToken,
+            /** Type of the new access token */
             'token_type' => 'Bearer',
+            /** Time in seconds for how long the access token is valid for */
             'expires_in' => 3600 // 1 hour in seconds
         ];
     }

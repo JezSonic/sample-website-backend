@@ -15,52 +15,111 @@ class GitHubUserDataResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'login' => $this->github_login,
-            'avatar_url' => $this->github_avatar_url,
-            'gravatar_id' => $this->github_gravatar_id,
-            'url' => $this->github_url,
-            'html_url' => $this->github_html_url,
-            'followers_url' => $this->github_followers_url,
-            'following_url' => $this->github_following_url,
-            'gists_url' => $this->github_gists_url,
-            'starred_url' => $this->github_starred_url,
-            'subscriptions_url' => $this->github_subscriptions_url,
-            'organizations_url' => $this->github_organizations_url,
-            'repos_url' => $this->github_repos_url,
-            'events_url' => $this->github_events_url,
-            'received_events_url' => $this->github_received_events_url,
-            'type' => $this->github_type,
-            'user_view_type' => $this->user_view_type,
             /**
-             * @phpstan-type bool
+             * @var string
+             * GitHub login of the user.
+             */
+            'login' => $this->github_login,
+
+            /**
+             * @var string
+             * URL of the user's GitHub avatar.
+             */
+            'avatar_url' => $this->github_avatar_url,
+
+            /**
+             * @var string
+             * Gravatar ID of the user.
+             */
+            'gravatar_id' => $this->github_gravatar_id,
+
+            /**
+             * @var string
+             * URL to user's GitHub profile.
+             */
+            'url' => $this->github_url,
+
+            /**
+             * @var bool
+             * Whether the user is a marked as a "Site admin".
              */
             'site_admin' => $this->github_site_admin,
-            'name' => $this->github_name,
-            'company' => $this->github_company,
-            'blog' => $this->github_blog,
-            'location' => $this->github_location,
-            'email' => $this->github_email,
+
             /**
-             * @phpstan-type bool
+             * @var string|null
+             * Name of the user.
+             */
+            'name' => $this->github_name,
+
+            /**
+             * @var string|null
+             * Company the user works for
+             */
+            'company' => $this->github_company,
+
+            /**
+             * @var string|null
+             * Blog URL of the user.
+             */
+            'blog' => $this->github_blog,
+
+            /**
+             * @var string|null
+             * Location of the user.
+             */
+            'location' => $this->github_location,
+
+            /**
+             * @var string
+             * Email of the user. If email is the same as the email of the user's account in the database - then it is considered and immediately marked as verified.
+             */
+            'email' => $this->github_email,
+
+            /**
+             * @var bool
+             * Whether the user is marked as "hireable".
              */
             'hireable' => $this->github_hireable,
-            'bio' => $this->github_bio,
-            'twitter_username' => $this->github_twitter_username,
-            'notification_email' => $this->github_notification_email,
+
             /**
-             * @phpstan-type int
+             * Biography of the user.
+             * @var string|null
+             */
+            'bio' => $this->github_bio,
+
+            /**
+             * Twitter username of the user (applies to a Twitter account connected to the GitHub account).
+             * @var string|null
+             */
+            'twitter_username' => $this->github_twitter_username,
+
+            /**
+             * Email used for GitHub notifications.
+             * @var string
+             */
+            'notification_email' => $this->github_notification_email,
+
+            /**
+             * @var int
+             * Number of public repositories.
              */
             'public_repos' => $this->public_repos,
+
             /**
-             * @phpstan-type int
+             * @var int
+             * Number of public gists.
              */
             'public_gists' => $this->public_gists,
+
             /**
-             * @phpstan-type int
+             * @var int
+             * Number of followers.
              */
             'followers' => $this->public_followers,
+
             /**
-             * @phpstan-type int
+             * @var int
+             * Number of users the authenticated user is following.
              */
             'following' => $this->public_following,
         ];

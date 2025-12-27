@@ -20,8 +20,19 @@ class NotificationsUpdateRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /**
+             * Whether the user wants to receive marketing emails
+             */
             'email_marketing' => 'required|boolean',
+
+            /**
+             * Whether the user wants to receive email notifications
+             */
             'email_notifications' => 'required|boolean',
+
+            /**
+             * Whether the user wants to receive security alerts emails
+             */
             'email_security_alerts' => 'required|boolean',
         ];
     }

@@ -36,34 +36,40 @@ trait Response {
         ], 401);
     }
 
-    function paginatedResponse(array $data, int $total, int $perPage, int $page, int $totalPages): JsonResponse {
+    function paginatedResponse(array $data, int $total, int $page, int $perPage, int $totalPages): JsonResponse {
         return response()->json([
             /**
              * Data returned to the requested page
+             *
+             * @var object[]
              */
             'data' => $data,
 
             /**
              * Total number of entries across all pages
-             * @type int
+             *
+             * @var int
              */
             'total' => $total,
 
             /**
-             * Number of page the data is from
-             * @type int
+             * Number of pages the data is from
+             *
+             * @var int
              */
             'current_page' => $page,
 
             /**
              * Number of items per page
-             * @type int
+             *
+             * @var int
              */
             'per_page' => $perPage,
 
             /**
              * Number of all pages available
-             * @type int
+             *
+             * @var int
              */
             'total_pages' => $totalPages
         ]);

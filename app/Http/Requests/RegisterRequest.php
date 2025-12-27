@@ -20,8 +20,19 @@ class RegisterRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /**
+             * Name of the user registering in the application.
+             */
             'name' => 'required|string',
+
+            /**
+             * Email address of the user registering in the application.
+             */
             'email' => 'required|string|email|unique:users',
+
+            /**
+             * Password of the user registering in the application.
+             */
             'password' => 'required|string'
         ];
     }

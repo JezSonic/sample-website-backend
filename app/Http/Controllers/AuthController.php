@@ -116,11 +116,12 @@ class AuthController extends Controller {
      * Refresh access token using refresh token
      *
      * @param Request $request The request object
-     * @return JsonResponse Response with new access token
+     * @return JsonResponse Response with a new access token
      * @throws InvalidRefreshTokenException If the refresh token is invalid or expired
      */
     function refreshToken(Request $request): JsonResponse {
         $request->validate([
+            /** Refresh token to generate an access token from */
             'refresh_token' => 'required|string'
         ]);
 
@@ -139,6 +140,7 @@ class AuthController extends Controller {
      */
     function revokeRefreshToken(Request $request): JsonResponse {
         $request->validate([
+            /** Refresh token to be revoked */
             'refresh_token' => 'required|string'
         ]);
 
@@ -234,6 +236,9 @@ class AuthController extends Controller {
     public function confirmTwoFactor(Request $request): JsonResponse {
         $user = User::find($request->user()->id);
         $data = $request->validate([
+            /**
+             * Two-factor authentication code provided by the user
+             */
             'code' => 'required'
         ]);
 
@@ -260,14 +265,20 @@ class AuthController extends Controller {
         // Log actual TOTP settings to debug potential mismatch
         $tfa = $user->twoFactorAuth;$activated = $user->confirmTwoFactorAuth($normalized);
         if ($activated) {
-            return response()->json(['recovery_codes' => $user->getRecoveryCodes()]);
+            return response()->json([
+                /**
+                 * Recovery codes for the user
+                 * @var string[]
+                 */
+                'recovery_codes' => $user->getRecoveryCodes()
+            ]);
         } else {
             return $this->invalidCredentialsResponse();
         }
     }
 
     /**
-     * Retrieve recovery codes for the authenticated user
+     * Generate new recovery codes for the authenticated user
      *
      * @param Request $request The request object containing user information
      * @return JsonResponse Response with the user's recovery codes
@@ -277,7 +288,13 @@ class AuthController extends Controller {
         if ($user == null) {
             return $this->invalidCredentialsResponse();
         }
-        return response()->json(['recovery_codes' => $user->getRecoveryCodes()]);
+        return response()->json([
+            /**
+             * Recovery codes for the user
+             * @var string[]
+             */
+            'recovery_codes' => $user->getRecoveryCodes()
+        ]);
     }
 
     /**

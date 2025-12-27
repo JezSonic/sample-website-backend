@@ -3,14 +3,15 @@
 namespace App\Utils\Services;
 
 use App\Exceptions\User\AccountNotFoundException;
+use App\Exceptions\User\InvalidAvatarSourceException;
 use App\Exceptions\User\PrivateProfileException;
 use App\Http\Resources\UserResource;
 use App\Jobs\ExportUserDataJob;
 use App\Models\User;
 use App\Models\UserDataExports;
 use App\Models\UserProfileSettings;
+use App\Utils\Enums\UserAvatarSource;
 use App\Utils\Enums\UserDataExportStatus;
-use App\Exceptions\Auth\OAuth\NoRefreshTokenException;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,9 +37,14 @@ class UserService {
      * @param User $user The user to update
      * @param array $data The profile data to update
      * @return bool True if the update was successful
+     * @throws InvalidAvatarSourceException
      */
     public static function updateUserProfile(User $user, array $data): bool {
         $user_profile_settings = $user->profileSettings()->first();
+
+        if (!in_array($data['avatar_source'], UserAvatarSource::cases())) {
+            throw new InvalidAvatarSourceException();
+        }
 
         if ($user_profile_settings == null) {
             $user_profile_settings = new UserProfileSettings();

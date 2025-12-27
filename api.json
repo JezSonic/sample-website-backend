@@ -2,7 +2,8 @@
     "openapi": "3.1.0",
     "info": {
         "title": "New DEV",
-        "version": "0.0.1"
+        "version": "0.0.1",
+        "description": "This is an overview of the API documentation. It provides detailed information about the available endpoints, request/response formats, and authentication methods. The documentation is generated automatically based on the API routes and their associated documentation comments."
     },
     "servers": [
         {
@@ -70,10 +71,12 @@
                                     "type": "object",
                                     "properties": {
                                         "content": {
-                                            "type": "boolean"
+                                            "type": "boolean",
+                                            "description": "Determines success of the verification"
                                         },
                                         "creating_password": {
-                                            "type": "boolean"
+                                            "type": "boolean",
+                                            "description": "Whether the token is for creating a new password"
                                         }
                                     },
                                     "required": [
@@ -291,7 +294,8 @@
                                 "type": "object",
                                 "properties": {
                                     "refresh_token": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Refresh token to generate an access token from"
                                     }
                                 },
                                 "required": [
@@ -310,16 +314,19 @@
                                     "type": "object",
                                     "properties": {
                                         "access_token": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "description": "Access token for the user"
                                         },
                                         "token_type": {
                                             "type": "string",
+                                            "description": "Type of the new access token",
                                             "enum": [
                                                 "Bearer"
                                             ]
                                         },
                                         "expires_in": {
                                             "type": "integer",
+                                            "description": "Time in seconds for how long the access token is valid for",
                                             "enum": [
                                                 3600
                                             ]
@@ -355,7 +362,8 @@
                                 "type": "object",
                                 "properties": {
                                     "refresh_token": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Refresh token to be revoked"
                                     }
                                 },
                                 "required": [
@@ -536,6 +544,7 @@
                     {
                         "name": "integration_id",
                         "in": "query",
+                        "description": "Integration ID of the OAuth provider",
                         "schema": {
                             "type": [
                                 "string",
@@ -679,7 +688,8 @@
                                 "type": "object",
                                 "properties": {
                                     "code": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Two-factor authentication code provided by the user"
                                     }
                                 },
                                 "required": [
@@ -701,7 +711,11 @@
                                     "type": "object",
                                     "properties": {
                                         "recovery_codes": {
-                                            "type": "string"
+                                            "type": "array",
+                                            "description": "Recovery codes for the user",
+                                            "items": {
+                                                "type": "string"
+                                            }
                                         }
                                     },
                                     "required": [
@@ -756,7 +770,7 @@
         "/api/auth/2fa/recovery-codes": {
             "get": {
                 "operationId": "auth.getRecoveryCodes",
-                "summary": "Retrieve recovery codes for the authenticated user",
+                "summary": "Generate new recovery codes for the authenticated user",
                 "tags": [
                     "Auth"
                 ],
@@ -769,7 +783,11 @@
                                     "type": "object",
                                     "properties": {
                                         "recovery_codes": {
-                                            "type": "string"
+                                            "type": "array",
+                                            "description": "Recovery codes for the user",
+                                            "items": {
+                                                "type": "string"
+                                            }
                                         }
                                     },
                                     "required": [
@@ -1218,17 +1236,26 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string",
-                                            "description": "Data returned to the requested page"
+                                            "type": "array",
+                                            "description": "Data returned to the requested page",
+                                            "items": {
+                                                "type": "object"
+                                            }
                                         },
                                         "total": {
-                                            "type": "string",
+                                            "type": "integer",
                                             "description": "Total number of entries across all pages"
                                         },
-                                        "current_page": {},
-                                        "per_page": {},
+                                        "current_page": {
+                                            "type": "integer",
+                                            "description": "Number of pages the data is from"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "description": "Number of items per page"
+                                        },
                                         "total_pages": {
-                                            "type": "string",
+                                            "type": "integer",
                                             "description": "Number of all pages available"
                                         }
                                     },
@@ -1273,94 +1300,94 @@
                 "type": "object",
                 "properties": {
                     "login": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "GitHub login of the user."
                     },
                     "avatar_url": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "URL of the user's GitHub avatar."
                     },
                     "gravatar_id": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Gravatar ID of the user."
                     },
                     "url": {
-                        "type": "string"
-                    },
-                    "html_url": {
-                        "type": "string"
-                    },
-                    "followers_url": {
-                        "type": "string"
-                    },
-                    "following_url": {
-                        "type": "string"
-                    },
-                    "gists_url": {
-                        "type": "string"
-                    },
-                    "starred_url": {
-                        "type": "string"
-                    },
-                    "subscriptions_url": {
-                        "type": "string"
-                    },
-                    "organizations_url": {
-                        "type": "string"
-                    },
-                    "repos_url": {
-                        "type": "string"
-                    },
-                    "events_url": {
-                        "type": "string"
-                    },
-                    "received_events_url": {
-                        "type": "string"
-                    },
-                    "type": {
-                        "type": "string"
-                    },
-                    "user_view_type": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "URL to user's GitHub profile."
                     },
                     "site_admin": {
-                        "type": "string"
+                        "type": "boolean",
+                        "description": "Whether the user is a marked as a \"Site admin\"."
                     },
                     "name": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Name of the user."
                     },
                     "company": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Company the user works for"
                     },
                     "blog": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Blog URL of the user."
                     },
                     "location": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Location of the user."
                     },
                     "email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Email of the user. If email is the same as the email of the user's account in the database - then it is considered and immediately marked as verified."
                     },
                     "hireable": {
-                        "type": "string"
+                        "type": "boolean",
+                        "description": "Whether the user is marked as \"hireable\"."
                     },
                     "bio": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Biography of the user."
                     },
                     "twitter_username": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Twitter username of the user (applies to a Twitter account connected to the GitHub account)."
                     },
                     "notification_email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Email used for GitHub notifications."
                     },
                     "public_repos": {
-                        "type": "string"
+                        "type": "integer",
+                        "description": "Number of public repositories."
                     },
                     "public_gists": {
-                        "type": "string"
+                        "type": "integer",
+                        "description": "Number of public gists."
                     },
                     "followers": {
-                        "type": "string"
+                        "type": "integer",
+                        "description": "Number of followers."
                     },
                     "following": {
-                        "type": "string"
+                        "type": "integer",
+                        "description": "Number of users the authenticated user is following."
                     }
                 },
                 "required": [
@@ -1368,18 +1395,6 @@
                     "avatar_url",
                     "gravatar_id",
                     "url",
-                    "html_url",
-                    "followers_url",
-                    "following_url",
-                    "gists_url",
-                    "starred_url",
-                    "subscriptions_url",
-                    "organizations_url",
-                    "repos_url",
-                    "events_url",
-                    "received_events_url",
-                    "type",
-                    "user_view_type",
                     "site_admin",
                     "name",
                     "company",
@@ -1401,16 +1416,20 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Google's account name."
                     },
                     "email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Google's account email. If email is the same as the email of the user's account in the database - then it is considered and immediately marked as verified."
                     },
                     "nickname": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Google's account nickname."
                     },
                     "avatar_url": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Google's account avatar URL."
                     }
                 },
                 "required": [
@@ -1427,20 +1446,24 @@
                     "email": {
                         "type": "string",
                         "format": "email",
+                        "description": "Email address of the user logging in to the application.",
                         "maxLength": 255
                     },
                     "password": {
                         "type": "string",
+                        "description": "Password of the user logging in to the application.",
                         "minLength": 6
                     },
                     "ip_address": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "IP address of the user logging in to the application."
                     },
                     "two_factor_code": {
                         "type": [
                             "string",
                             "null"
-                        ]
+                        ],
+                        "description": "Two-factor authentication code provided by the user. Required only if two-factor authentication is enabled in the user's account."
                     }
                 },
                 "required": [
@@ -1454,13 +1477,16 @@
                 "type": "object",
                 "properties": {
                     "email_marketing": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user wants to receive marketing emails"
                     },
                     "email_notifications": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user wants to receive email notifications"
                     },
                     "email_security_alerts": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user wants to receive security alerts emails"
                     }
                 },
                 "required": [
@@ -1474,7 +1500,8 @@
                 "type": "object",
                 "properties": {
                     "ip_address": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "IP address of the user logging in to the application."
                     }
                 },
                 "required": [
@@ -1496,34 +1523,48 @@
                 "type": "object",
                 "properties": {
                     "avatar_source": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Avatar source for the user",
+                        "enum": [
+                            "google",
+                            "github",
+                            "default"
+                        ]
                     },
                     "is_public": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user's profile is publicly visible"
                     },
                     "language": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "User's preferred UI language"
                     },
                     "theme": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "User's preferred UI theme"
                     },
                     "name": {
                         "type": [
                             "string",
                             "null"
-                        ]
+                        ],
+                        "description": "User's account name"
                     },
                     "notifications": {
                         "type": "object",
+                        "description": "User's notification settings",
                         "properties": {
                             "email_notifications": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive email notifications"
                             },
                             "email_marketing": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive marketing emails"
                             },
                             "email_security_alerts": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive security alerts emails"
                             }
                         },
                         "required": [
@@ -1546,14 +1587,17 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Name of the user registering in the application."
                     },
                     "email": {
                         "type": "string",
-                        "format": "email"
+                        "format": "email",
+                        "description": "Email address of the user registering in the application."
                     },
                     "password": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Password of the user registering in the application."
                     }
                 },
                 "required": [
@@ -1567,10 +1611,12 @@
                 "type": "object",
                 "properties": {
                     "page": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Page to begin the pagination from."
                     },
                     "per_page": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Number of items to return per page."
                     }
                 },
                 "required": [
@@ -1578,6 +1624,16 @@
                     "per_page"
                 ],
                 "title": "UserActivityRequest"
+            },
+            "UserAvatarSource": {
+                "type": "string",
+                "description": "| |\n|---|\n| `default` <br/> Default avatar source. |\n| `google` <br/> Avatar source from Google. |\n| `github` <br/> Avatar source from GitHub. |",
+                "enum": [
+                    "default",
+                    "google",
+                    "github"
+                ],
+                "title": "UserAvatarSource"
             },
             "UserDataExportStatus": {
                 "type": "string",
@@ -1595,31 +1651,40 @@
                 "type": "object",
                 "properties": {
                     "theme": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Preferred UI theme"
                     },
                     "language": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Preferred language"
                     },
                     "timezone": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Preferred timezone"
                     },
                     "avatar_source": {
-                        "type": "string"
+                        "description": "Avatar source for the user\n| |\n|---|\n| `default` <br/> Default avatar source. |\n| `google` <br/> Avatar source from Google. |\n| `github` <br/> Avatar source from GitHub. |",
+                        "$ref": "#/components/schemas/UserAvatarSource"
                     },
                     "is_public": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user's profile is publicly visible"
                     },
                     "notifications": {
                         "type": "object",
+                        "description": "User's notification settings",
                         "properties": {
                             "email_notifications": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive email notifications"
                             },
                             "email_marketing": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive email marketing notifications"
                             },
                             "email_security_alerts": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "description": "Whether the user wants to receive email security alerts notifications"
                             }
                         },
                         "required": [
@@ -1643,49 +1708,60 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "User ID"
                     },
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "User's full name"
                     },
                     "email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "User's email address"
                     },
                     "email_verified_at": {
                         "type": [
                             "string",
                             "null"
                         ],
-                        "format": "date-time"
+                        "format": "date-time",
+                        "description": "User's email address verification timestamp"
                     },
                     "created_at": {
                         "type": [
                             "string",
                             "null"
                         ],
-                        "format": "date-time"
+                        "format": "date-time",
+                        "description": "Date and time when the account was created"
                     },
                     "updated_at": {
                         "type": [
                             "string",
                             "null"
                         ],
-                        "format": "date-time"
+                        "format": "date-time",
+                        "description": "Date and time when the account was last updated"
                     },
                     "google": {
+                        "description": "Data for a connected Google account",
                         "$ref": "#/components/schemas/GoogleUserDataResource"
                     },
                     "github": {
+                        "description": "Data for a connected GitHub account",
                         "$ref": "#/components/schemas/GitHubUserDataResource"
                     },
                     "profile_settings": {
+                        "description": "User profile settings",
                         "$ref": "#/components/schemas/UserProfileSettingsResource"
                     },
                     "has_password": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether the user has a password set"
                     },
                     "has_two_factor_enabled": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether two-factor authentication is enabled for the user"
                     }
                 },
                 "required": [

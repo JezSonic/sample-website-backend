@@ -20,9 +20,24 @@ class LoginRequest extends FormRequest {
      */
     public function rules(): array {
         return [
+            /**
+             * Email address of the user logging in to the application.
+             */
             'email' => 'required|string|email|max:255',
+
+            /**
+             * Password of the user logging in to the application.
+             */
             'password' => 'required|string|min:6',
+
+            /**
+             * IP address of the user logging in to the application.
+             */
             'ip_address' => 'required|string|ip',
+
+            /**
+             * Two-factor authentication code provided by the user. Required only if two-factor authentication is enabled in the user's account.
+             */
             'two_factor_code' => 'nullable|string'
         ];
     }

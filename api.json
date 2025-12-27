@@ -371,7 +371,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
                                 }
                             }
                         }
@@ -395,7 +407,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "content": {
+                                            "type": "boolean",
+                                            "description": "Boolean indicating whether the operation was successful or not",
+                                            "examples": [
+                                                true
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "content"
+                                    ]
                                 }
                             }
                         }
@@ -1201,14 +1225,8 @@
                                             "type": "string",
                                             "description": "Total number of entries across all pages"
                                         },
-                                        "current_page": {
-                                            "type": "string",
-                                            "description": "Number of page the data is from"
-                                        },
-                                        "per_page": {
-                                            "type": "string",
-                                            "description": "Number of items per page"
-                                        },
+                                        "current_page": {},
+                                        "per_page": {},
                                         "total_pages": {
                                             "type": "string",
                                             "description": "Number of all pages available"
@@ -1589,19 +1607,19 @@
                         "type": "string"
                     },
                     "is_public": {
-                        "type": "string"
+                        "type": "boolean"
                     },
                     "notifications": {
                         "type": "object",
                         "properties": {
                             "email_notifications": {
-                                "type": "string"
+                                "type": "boolean"
                             },
                             "email_marketing": {
-                                "type": "string"
+                                "type": "boolean"
                             },
                             "email_security_alerts": {
-                                "type": "string"
+                                "type": "boolean"
                             }
                         },
                         "required": [

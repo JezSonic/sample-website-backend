@@ -1,7 +1,10 @@
 <?php
 
-use App\Scramble\Extensions\OAuth\UnsupportedDriverExceptionExtension;
-use App\Scramble\Extensions\OAuthExceptionExtension;
+use App\Scramble\Extensions\Auth\OAuth\OAuthExceptionExtension;
+use App\Scramble\Extensions\Auth\OAuth\UnsupportedDriverExceptionExtension;
+use App\Scramble\Extensions\User\AccountNotFoundExceptionExtension;
+use App\Scramble\Extensions\User\InvalidAvatarSourceExceptionExtension;
+use App\Scramble\Extensions\User\PrivateProfileExceptionExtension;
 use Dedoc\Scramble\Support\InferExtensions\JsonResourceExtension;
 use Dedoc\Scramble\Support\InferExtensions\JsonResponseMethodReturnTypeExtension;
 use Dedoc\Scramble\Support\InferExtensions\ModelExtension;
@@ -156,6 +159,9 @@ return [
     'extensions' => [
         OAuthExceptionExtension::class,
         UnsupportedDriverExceptionExtension::class,
+        PrivateProfileExceptionExtension::class,
+        InvalidAvatarSourceExceptionExtension::class,
+        AccountNotFoundExceptionExtension::class,
         CollectionToSchema::class,
         DeprecationExtension::class,
         JsonResourceExtension::class,

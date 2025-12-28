@@ -8,6 +8,7 @@ use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
 use App\Exceptions\Auth\OAuth\UnsupportedDriver;
 use App\Exceptions\Auth\TwoFactor\TwoFactorAlreadyEnabledException;
 use App\Exceptions\Auth\TwoFactor\TwoFactorRequiredException;
+use App\Exceptions\User\AccountNotFoundException;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\OAuthCallbackRequest;
@@ -65,10 +66,11 @@ class AuthController extends Controller {
     }
 
     /**
-     * Login a user with email and password
+     * Log in a user with email and password
      *
      * @param LoginRequest $request The login request
      * @return JsonResponse Response with tokens or error
+     * @throws AccountNotFoundException If the account does not exist
      * @throws OAuthAccountPasswordLoginException|TwoFactorRequiredException If the account was created using OAuth
      */
     function login(LoginRequest $request): JsonResponse {

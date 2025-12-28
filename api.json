@@ -188,7 +188,7 @@
         "/api/auth/login": {
             "post": {
                 "operationId": "auth.login",
-                "summary": "Login a user with email and password",
+                "summary": "Log in a user with email and password",
                 "tags": [
                     "Auth"
                 ],
@@ -269,6 +269,9 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AccountNotFoundException"
                     },
                     "500": {
                         "$ref": "#/components/responses/OAuthAccountPasswordLoginException"
@@ -887,6 +890,9 @@
                             }
                         }
                     },
+                    "400": {
+                        "$ref": "#/components/responses/InvalidAvatarSourceException"
+                    },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
@@ -957,6 +963,12 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AccountNotFoundException"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/PrivateProfileException"
                     }
                 }
             }
@@ -1821,6 +1833,25 @@
                     }
                 }
             },
+            "AccountNotFoundException": {
+                "description": "Account not found exception",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
             "OAuthAccountPasswordLoginException": {
                 "description": "OAuth Authentication exception",
                 "content": {
@@ -1880,6 +1911,44 @@
             },
             "ModelNotFoundException": {
                 "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "PrivateProfileException": {
+                "description": "Private profile exception",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "InvalidAvatarSourceException": {
+                "description": "Invalid avatar source exception",
                 "content": {
                     "application/json": {
                         "schema": {

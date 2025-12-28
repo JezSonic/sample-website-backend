@@ -4,6 +4,7 @@ namespace App\Utils\Services;
 
 use App\Exceptions\Auth\OAuth\OAuthAccountPasswordLoginException;
 use App\Exceptions\Auth\TwoFactor\TwoFactorRequiredException;
+use App\Exceptions\User\AccountNotFoundException;
 use App\Models\User;
 use App\Models\UserProfileSettings;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class AuthService {
      * @return array|null The user and tokens if login was successful, null otherwise
      * @throws OAuthAccountPasswordLoginException If the account was created using OAuth
      * @throws TwoFactorRequiredException
+     * @throws AccountNotFoundException
      */
     public static function login(string $email, string $password, Request $request): ?array {
         Auth::guard()->logout();
@@ -56,7 +58,7 @@ class AuthService {
         $user = User::where('email', '=', $email)->first();
 
         if ($user == null) {
-            return null;
+            throw new AccountNotFoundException();
         }
 
         if ($user->hasTwoFactorEnabled() && $data['two_factor_code'] == null) {

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Scramble\Extensions;
+namespace App\Scramble\Extensions\User;
 
-use App\Exceptions\Auth\OAuth\AuthOAuthException;
+use App\Exceptions\User\AccountNotFoundException;
+use App\Exceptions\User\PrivateProfileException;
 use Dedoc\Scramble\Extensions\ExceptionToResponseExtension;
 use Dedoc\Scramble\Support\Generator\Reference;
 use Dedoc\Scramble\Support\Generator\Response;
@@ -12,11 +13,11 @@ use Dedoc\Scramble\Support\Type\ObjectType;
 use Dedoc\Scramble\Support\Type\Type;
 use Illuminate\Support\Str;
 
-class OAuthExceptionExtension extends ExceptionToResponseExtension {
+class PrivateProfileExceptionExtension extends ExceptionToResponseExtension {
     public function shouldHandle(Type $type): bool {
         return $type instanceof ObjectType
             && (
-            $type->isInstanceOf(AuthOAuthException::class)
+            $type->isInstanceOf(PrivateProfileException::class)
             );
     }
 
@@ -29,8 +30,8 @@ class OAuthExceptionExtension extends ExceptionToResponseExtension {
             )
             ->setRequired(['message']);
 
-        return Response::make(500)
-            ->description('OAuth Authentication exception')
+        return Response::make(400)
+            ->description('Private profile exception')
             ->setContent(
                 'application/json',
                 Schema::fromType($validationResponseBodyType)

@@ -147,6 +147,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ];
             }
 
-            return response()->json($response, 500);
+            return response()->json($response, $e->getCode() ?? 500);
         });
     })->create();

@@ -57,8 +57,7 @@ class OAuthService {
      * @throws UnsupportedDriver If the driver is not supported
      */
     public static function checkDriver(OAuthDrivers $driver): bool {
-        $array = array_column(OAuthDrivers::cases(), 'value');
-        if (!in_array($driver->value, $array)) {
+        if (OAuthDrivers::tryFrom($driver->value) == null) {
             throw new UnsupportedDriver();
         }
         return true;

@@ -42,7 +42,7 @@ class UserService {
     public static function updateUserProfile(User $user, array $data): bool {
         $user_profile_settings = $user->profileSettings()->first();
 
-        if (!in_array($data['avatar_source'], UserAvatarSource::cases())) {
+        if (UserAvatarSource::tryFrom($data['avatar_source']) == null) {
             throw new InvalidAvatarSourceException();
         }
 

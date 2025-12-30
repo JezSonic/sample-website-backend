@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\Auth\OAuth\AuthOAuthException;
+use App\Exceptions\User\AccountNotFoundException;
 use Firebase\JWT\ExpiredException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -132,6 +133,16 @@ return Application::configure(basePath: dirname(__DIR__))
             ], $e->getCode());
         });
 
+        $exceptions->renderable(function (AccountNotFoundException $e) {
+            return response()->json([
+                'content' => [
+                    'type' => 'account_not_found',
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode()
+                ]
+            ], $e->getCode());
+        });
+
         $exceptions->renderable(function (Throwable $e) {
             $response = [
                 'message' => $e->getMessage(),
@@ -147,6 +158,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ];
             }
 
-            return response()->json($response, $e->getCode() ?? 500);
+            return response()->json(['content' => $response], 500);
         });
     })->create();

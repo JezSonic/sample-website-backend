@@ -4,17 +4,17 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserLoginActivityController;
 use Illuminate\Support\Facades\Route;
 
-// User profile routes
-Route::get('/', [UserController::class, 'index'])->middleware(['auth:sanctum', 'token.refresh']);
-Route::get('/{userId}', [UserController::class, 'show']);
-Route::patch('/', [UserController::class, 'update'])->middleware(['auth:sanctum', 'token.refresh']);
-Route::delete('/', [UserController::class, 'destroy'])->middleware(['auth:sanctum', 'token.refresh']);
-
 // User data export routes
 Route::get('/export-data', [UserController::class, 'exportUserData'])->middleware(['auth:sanctum', 'token.refresh']);
 Route::get('/{userId}/export-data/download', [UserController::class, 'downloadExportedData']);
 Route::get('/{userId}/export-data/status', [UserController::class, 'checkExportDataStatus']);
 Route::put('/notifications', [UserController::class, 'updateNotifications'])->middleware(['auth:sanctum', 'token.refresh']);
+
+// User profile routes
+Route::get('/', [UserController::class, 'index'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::get('/{userId}', [UserController::class, 'show']);
+Route::patch('/', [UserController::class, 'update'])->middleware(['auth:sanctum', 'token.refresh']);
+Route::delete('/', [UserController::class, 'destroy'])->middleware(['auth:sanctum', 'token.refresh']);
 
 // Email verification routes
 Route::post('/verify-email', [UserController::class, 'sendVerificationEmail'])->middleware(['auth:sanctum', 'token.refresh']);
